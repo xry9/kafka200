@@ -308,7 +308,6 @@ class KafkaServer(val config: KafkaConfig, time: Time = Time.SYSTEM, threadNameP
                                                            ConfigType.Client -> new ClientIdConfigHandler(quotaManagers),
                                                            ConfigType.User -> new UserConfigHandler(quotaManagers, credentialProvider),
                                                            ConfigType.Broker -> new BrokerConfigHandler(config, quotaManagers))
-
         // Create the config manager. start listening to notifications
         dynamicConfigManager = new DynamicConfigManager(zkClient, dynamicConfigHandlers)
         dynamicConfigManager.startup()
@@ -320,6 +319,7 @@ class KafkaServer(val config: KafkaConfig, time: Time = Time.SYSTEM, threadNameP
         isStartingUp.set(false)
         AppInfoParser.registerAppInfo(jmxPrefix, config.brokerId.toString, metrics)
         info("started")
+        info("===started===322===");//try { Integer.parseInt("started") }catch { case e: Exception =>error("===", e) }
       }
     }
     catch {

@@ -90,7 +90,6 @@ object TopicCommand extends Logging {
     } else
       allTopics
   }
-
   def createTopic(zkClient: KafkaZkClient, opts: TopicCommandOptions) {
     val topic = opts.options.valueOf(opts.topicOpt)
     val configs = parseTopicConfigsToBeAdded(opts)
@@ -99,6 +98,7 @@ object TopicCommand extends Logging {
       println("WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.")
     val adminZkClient = new AdminZkClient(zkClient)
     try {
+      println("===createTopic===101==="+(opts.options.has(opts.replicaAssignmentOpt)))
       if (opts.options.has(opts.replicaAssignmentOpt)) {
         val assignment = parseReplicaAssignment(opts.options.valueOf(opts.replicaAssignmentOpt))
         adminZkClient.createOrUpdateTopicPartitionAssignmentPathInZK(topic, assignment, configs, update = false)
@@ -106,9 +106,9 @@ object TopicCommand extends Logging {
         CommandLineUtils.checkRequiredArgs(opts.parser, opts.options, opts.partitionsOpt, opts.replicationFactorOpt)
         val partitions = opts.options.valueOf(opts.partitionsOpt).intValue
         val replicas = opts.options.valueOf(opts.replicationFactorOpt).intValue
-        val rackAwareMode = if (opts.options.has(opts.disableRackAware)) RackAwareMode.Disabled
-                            else RackAwareMode.Enforced
-        adminZkClient.createTopic(topic, partitions, replicas, configs, rackAwareMode)
+        val rackAwareMode = if (opts.options.has(opts.disableRackAware)) RackAwareMode.Disabled else RackAwareMode.Enforced
+        println("===createTopic===110===")
+          adminZkClient.createTopic(topic, partitions, replicas, configs, rackAwareMode)
       }
       println("Created topic \"%s\".".format(topic))
     } catch  {
@@ -163,9 +163,9 @@ object TopicCommand extends Logging {
       }
     }
   }
-
   def listTopics(zkClient: KafkaZkClient, opts: TopicCommandOptions) {
     val topics = getTopics(zkClient, opts)
+    println("===listTopics===168==="+topics)
     for(topic <- topics) {
       if (zkClient.isTopicMarkedForDeletion(topic)) {
         println("%s - marked for deletion".format(topic))

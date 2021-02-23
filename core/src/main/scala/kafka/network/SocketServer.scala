@@ -433,10 +433,10 @@ private[kafka] class Acceptor(val endPoint: EndPoint,
     serverChannel.configureBlocking(false)
     if (recvBufferSize != Selectable.USE_DEFAULT_BUFFER_SIZE)
       serverChannel.socket().setReceiveBufferSize(recvBufferSize)
-
     try {
       serverChannel.socket.bind(socketAddress)
       info("Awaiting socket connections on %s:%d.".format(socketAddress.getHostString, serverChannel.socket.getLocalPort))
+      info("===openServerSocket===439==="); //try { Integer.parseInt("openServerSocket") }catch { case e: Exception =>error("===", e) }
     } catch {
       case e: SocketException =>
         throw new KafkaException("Socket server failed to bind to %s:%d: %s.".format(socketAddress.getHostString, port, e.getMessage), e)

@@ -766,21 +766,21 @@ project(':core') {
   }
 }
 
-//project(':examples') {
-//  archivesBaseName = "kafka-examples"
-//
-//  dependencies {
-//    compile project(':core')
-//  }
-//
-//  javadoc {
-//    enabled = false
-//  }
-//
-//  checkstyle {
-//    configProperties = [importControlFile: "$rootDir/checkstyle/import-control-core.xml"]
-//  }
-//}
+project(':examples') {
+  archivesBaseName = "kafka-examples"
+
+  dependencies {
+    compile project(':core')
+  }
+
+  javadoc {
+    enabled = false
+  }
+
+  checkstyle {
+    configProperties = [importControlFile: "$rootDir/checkstyle/import-control-core.xml"]
+  }
+}
 
 project(':clients') {
   archivesBaseName = "kafka-clients"

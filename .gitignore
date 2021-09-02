@@ -10,4 +10,5 @@ jstorm-local
 .idea
 .classpath
 .project
+.gradle
 *iml

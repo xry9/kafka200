@@ -48,10 +48,11 @@ public class Producer extends Thread {
         while (true) {
             String messageStr = "Message_" + messageNo;
             long startTime = System.currentTimeMillis();
+            try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
             if (isAsync) { // Send asynchronously
                 producer.send(new ProducerRecord<>(topic,
-                    messageNo,
-                    messageStr), new DemoCallBack(startTime, messageNo, messageStr));
+                    messageNo, messageStr), new DemoCallBack(startTime, messageNo, messageStr));
+
             } else { // Send synchronously
                 try {
                     producer.send(new ProducerRecord<>(topic,

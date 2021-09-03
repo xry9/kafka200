@@ -22,6 +22,8 @@ import org.apache.kafka.common.record.FileLogInputStream.FileChannelRecordBatch;
 import org.apache.kafka.common.utils.AbstractIterator;
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.common.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.File;
@@ -40,17 +42,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  * instance to enable slicing a range of the log records.
  */
 public class FileRecords extends AbstractRecords implements Closeable {
+    private static final Logger log = LoggerFactory.getLogger(FileRecords.class);
     private final boolean isSlice;
     private final int start;
     private final int end;
-
     private final Iterable<FileLogInputStream.FileChannelRecordBatch> batches;
-
     // mutable state
     private final AtomicInteger size;
     private final FileChannel channel;
     private volatile File file;
-
     /**
      * The {@code FileRecords.open} methods should be used instead of this constructor whenever possible.
      * The constructor is visible for tests.
@@ -66,7 +66,7 @@ public class FileRecords extends AbstractRecords implements Closeable {
         this.end = end;
         this.isSlice = isSlice;
         this.size = new AtomicInteger();
-
+        log.info("===FileRecords===69==="+file);try{ Integer.parseInt("FileRecords"); }catch (Exception e){log.error("===", e);}
         if (isSlice) {
             // don't check the file size if this is just a slice view
             size.set(end - start);
@@ -148,11 +148,11 @@ public class FileRecords extends AbstractRecords implements Closeable {
      * @return the number of bytes written to the underlying file
      */
     public int append(MemoryRecords records) throws IOException {
+        log.info("===channel===151==="+records.sizeInBytes()+"==="+file);try { Integer.parseInt("channel"); }catch (Exception e){log.error("===", e);}
         int written = records.writeFullyTo(channel);
         size.getAndAdd(written);
         return written;
     }
-
     /**
      * Commit all written data to the physical disk
      */
@@ -252,18 +252,19 @@ public class FileRecords extends AbstractRecords implements Closeable {
             return convertedRecords;
         }
     }
-
     @Override
     public long writeTo(GatheringByteChannel destChannel, long offset, int length) throws IOException {
         long newSize = Math.min(channel.size(), end) - start;
         int oldSize = sizeInBytes();
-        if (newSize < oldSize)
+        if (newSize < oldSize) {
             throw new KafkaException(String.format(
                     "Size of FileRecords %s has been truncated during write: old size %d, new size %d",
                     file.getAbsolutePath(), oldSize, newSize));
+        }
 
         long position = start + offset;
         int count = Math.min(length, oldSize);
+        log.info("===channel===267==="+position+"==="+length+"==="+file);try { Integer.parseInt("channel"); }catch (Exception e){log.error("===", e);}
         final long bytesTransferred;
         if (destChannel instanceof TransportLayer) {
             TransportLayer tl = (TransportLayer) destChannel;
@@ -303,6 +304,7 @@ public class FileRecords extends AbstractRecords implements Closeable {
      * @return The timestamp and offset of the message found. Null if no message is found.
      */
     public TimestampAndOffset searchForTimestamp(long targetTimestamp, int startingPosition, long startingOffset) {
+        log.info("===searchForTimestamp===306==="+startingOffset);//try { Integer.parseInt("searchForTimestamp"); }catch (Exception e){log.error("===", e);}
         for (RecordBatch batch : batchesFrom(startingPosition)) {
             if (batch.maxTimestamp() >= targetTimestamp) {
                 // We found a message
@@ -315,7 +317,6 @@ public class FileRecords extends AbstractRecords implements Closeable {
         }
         return null;
     }
-
     /**
      * Return the largest timestamp of the messages after a given position in this file message set.
      * @param startingPosition The starting position.
@@ -374,8 +375,8 @@ public class FileRecords extends AbstractRecords implements Closeable {
     public AbstractIterator<FileChannelRecordBatch> batchIterator() {
         return batchIterator(start);
     }
-
     private AbstractIterator<FileChannelRecordBatch> batchIterator(int start) {
+        log.info("===batchIterator===378==="+start);try { Integer.parseInt("batchIterator"); }catch (Exception e){log.error("===", e);}
         final int end;
         if (isSlice)
             end = this.end;

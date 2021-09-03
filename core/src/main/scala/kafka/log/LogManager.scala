@@ -304,7 +304,7 @@ class LogManager(logDirs: Seq[File],
     val threadPools = ArrayBuffer.empty[ExecutorService]
     val offlineDirs = mutable.Set.empty[(String, IOException)]
     val jobs = mutable.Map.empty[File, Seq[Future[_]]]
-
+    logger.info("===loadLogs===307==="+liveLogDirs); try { Integer.parseInt("loadLogs") } catch { case e: Exception => error("===", e); }
     for (dir <- liveLogDirs) {
       try {
         val pool = Executors.newFixedThreadPool(numRecoveryThreadsPerDataDir)
@@ -629,12 +629,12 @@ class LogManager(logDirs: Seq[File],
    * @param isFuture True iff the future log of the specified partition should be returned
    */
   def getLog(topicPartition: TopicPartition, isFuture: Boolean = false): Option[Log] = {
+    logger.info("===getLog===632==="+isFuture+"==="+topicPartition)
     if (isFuture)
       Option(futureLogs.get(topicPartition))
     else
       Option(currentLogs.get(topicPartition))
   }
-
   /**
    * If the log already exists, just return a copy of the existing log
    * Otherwise if isNew=true or if there is no offline log directory, create a log for the given topic and the given partition

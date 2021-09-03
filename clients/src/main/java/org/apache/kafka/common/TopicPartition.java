@@ -16,22 +16,22 @@
  */
 package org.apache.kafka.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.Serializable;
-
 /**
  * A topic name and partition number
  */
 public final class TopicPartition implements Serializable {
-
+    private static final Logger log = LoggerFactory.getLogger(TopicPartition.class);
     private int hash = 0;
     private final int partition;
     private final String topic;
-
     public TopicPartition(String topic, int partition) {
         this.partition = partition;
         this.topic = topic;
+        log.info("===TopicPartition===33==="+topic+"==="+partition);
     }
-
     public int partition() {
         return partition;
     }

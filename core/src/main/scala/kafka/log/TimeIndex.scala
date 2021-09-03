@@ -52,7 +52,7 @@ import org.apache.kafka.common.record.RecordBatch
 // Avoid shadowing mutable file in AbstractIndex
 class TimeIndex(_file: File, baseOffset: Long, maxIndexSize: Int = -1, writable: Boolean = true)
     extends AbstractIndex[Long, Long](_file, baseOffset, maxIndexSize, writable) with Logging {
-
+  logger.info("===TimeIndex===55==="+_file)
   @volatile private var _lastEntry = lastEntryFromIndexFile
 
   override def entrySize = 12

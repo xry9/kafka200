@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 package org.apache.kafka.common.record;
-
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.errors.CorruptRecordException;
 import org.apache.kafka.common.record.AbstractLegacyRecordBatch.LegacyFileChannelRecordBatch;
 import org.apache.kafka.common.record.DefaultRecordBatch.DefaultFileChannelRecordBatch;
 import org.apache.kafka.common.utils.CloseableIterator;
 import org.apache.kafka.common.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -33,16 +34,15 @@ import static org.apache.kafka.common.record.Records.HEADER_SIZE_UP_TO_MAGIC;
 import static org.apache.kafka.common.record.Records.MAGIC_OFFSET;
 import static org.apache.kafka.common.record.Records.OFFSET_OFFSET;
 import static org.apache.kafka.common.record.Records.SIZE_OFFSET;
-
 /**
  * A log input stream which is backed by a {@link FileChannel}.
  */
 public class FileLogInputStream implements LogInputStream<FileLogInputStream.FileChannelRecordBatch> {
+    private static final Logger log = LoggerFactory.getLogger(FileLogInputStream.class);
     private int position;
     private final int end;
     private final FileRecords fileRecords;
     private final ByteBuffer logHeaderBuffer = ByteBuffer.allocate(HEADER_SIZE_UP_TO_MAGIC);
-
     /**
      * Create a new log input stream over the FileChannel
      * @param records Underlying FileRecords instance
@@ -60,9 +60,9 @@ public class FileLogInputStream implements LogInputStream<FileLogInputStream.Fil
     @Override
     public FileChannelRecordBatch nextBatch() throws IOException {
         FileChannel channel = fileRecords.channel();
+        log.info("===nextBatch===63==="+channel);try { Integer.parseInt("nextBatch"); }catch (Exception e){log.error("===", e);}
         if (position >= end - HEADER_SIZE_UP_TO_MAGIC)
             return null;
-
         logHeaderBuffer.rewind();
         Utils.readFullyOrFail(channel, logHeaderBuffer, position, "log header");
 

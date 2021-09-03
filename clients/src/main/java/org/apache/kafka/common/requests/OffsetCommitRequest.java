@@ -25,6 +25,8 @@ import org.apache.kafka.common.protocol.types.Field;
 import org.apache.kafka.common.protocol.types.Schema;
 import org.apache.kafka.common.protocol.types.Struct;
 import org.apache.kafka.common.utils.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -44,9 +46,9 @@ import static org.apache.kafka.common.protocol.types.Type.NULLABLE_STRING;
  * This wrapper supports both v0 and v1 of OffsetCommitRequest.
  */
 public class OffsetCommitRequest extends AbstractRequest {
+    private static final Logger log = LoggerFactory.getLogger(OffsetCommitRequest.class);
     private static final String TOPICS_KEY_NAME = "topics";
     private static final String RETENTION_TIME_KEY_NAME = "retention_time";
-
     // topic level field names
     private static final String PARTITIONS_KEY_NAME = "partitions";
 
@@ -172,8 +174,8 @@ public class OffsetCommitRequest extends AbstractRequest {
             super(ApiKeys.OFFSET_COMMIT);
             this.groupId = groupId;
             this.offsetData = offsetData;
+            log.info("===OFFSET_COMMIT===177===");
         }
-
         public Builder setMemberId(String memberId) {
             this.memberId = memberId;
             return this;
@@ -188,9 +190,9 @@ public class OffsetCommitRequest extends AbstractRequest {
             this.retentionTime = retentionTime;
             return this;
         }
-
         @Override
         public OffsetCommitRequest build(short version) {
+            //System.out.println("===OffsetCommitRequest===195==="+version);//try { Integer.parseInt("OffsetCommitRequest"); }catch (Exception e){e.printStackTrace();}
             switch (version) {
                 case 0:
                     return new OffsetCommitRequest(groupId, DEFAULT_GENERATION_ID, DEFAULT_MEMBER_ID,
@@ -228,11 +230,11 @@ public class OffsetCommitRequest extends AbstractRequest {
         this.memberId = memberId;
         this.retentionTime = retentionTime;
         this.offsetData = offsetData;
+        //System.out.println("===OffsetCommitRequest===233==="+offsetData);
     }
-
     public OffsetCommitRequest(Struct struct, short versionId) {
         super(versionId);
-
+        //System.out.println("===OffsetCommitRequest===237===");
         groupId = struct.get(GROUP_ID);
 
         // These fields only exists in v1.
@@ -271,8 +273,8 @@ public class OffsetCommitRequest extends AbstractRequest {
     public Struct toStruct() {
         short version = version();
         Struct struct = new Struct(ApiKeys.OFFSET_COMMIT.requestSchema(version));
+        log.info("===OFFSET_COMMIT===276===");
         struct.set(GROUP_ID, groupId);
-
         Map<String, Map<Integer, PartitionData>> topicsData = CollectionUtils.groupDataByTopic(offsetData);
         List<Struct> topicArray = new ArrayList<>();
         for (Map.Entry<String, Map<Integer, PartitionData>> topicEntry: topicsData.entrySet()) {
@@ -342,9 +344,9 @@ public class OffsetCommitRequest extends AbstractRequest {
     public Map<TopicPartition, PartitionData> offsetData() {
         return offsetData;
     }
-
     public static OffsetCommitRequest parse(ByteBuffer buffer, short version) {
         Schema schema = ApiKeys.OFFSET_COMMIT.requestSchema(version);
+        //System.out.println("===OFFSET_COMMIT===OffsetCommitRequest===349===");
         return new OffsetCommitRequest(schema.read(buffer), version);
     }
 }

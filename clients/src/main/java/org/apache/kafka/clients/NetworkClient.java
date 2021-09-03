@@ -482,9 +482,9 @@ public class NetworkClient implements KafkaClient {
                 send,
                 now);
         this.inFlightRequests.add(inFlightRequest);
+        //System.out.println("===doSend===485===");
         selector.send(send);
     }
-
     /**
      * Do actual reads and writes to sockets.
      *

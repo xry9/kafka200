@@ -730,10 +730,10 @@ class ReplicaManager(val config: KafkaConfig,
                                entriesPerPartition: Map[TopicPartition, MemoryRecords],
                                requiredAcks: Short): Map[TopicPartition, LogAppendResult] = {
     trace(s"Append [$entriesPerPartition] to local log")
+    logger.info("===appendToLocalLog===733==="+entriesPerPartition); try { Integer.parseInt("appendToLocalLog") } catch {case e: Exception => error("===", e)}
     entriesPerPartition.map { case (topicPartition, records) =>
-      brokerTopicStats.topicStats(topicPartition.topic).totalProduceRequestRate.mark()
+    brokerTopicStats.topicStats(topicPartition.topic).totalProduceRequestRate.mark()
       brokerTopicStats.allTopicsStats.totalProduceRequestRate.mark()
-
       // reject appending to internal topics if it is not allowed
       if (Topic.isInternal(topicPartition.topic) && !internalTopicsAllowed) {
         (topicPartition, LogAppendResult(

@@ -212,8 +212,8 @@ public class Selector implements Selectable, AutoCloseable {
         try {
             configureSocketChannel(socketChannel, sendBufferSize, receiveBufferSize);
             boolean connected = doConnect(socketChannel, address);
+            System.out.println("===connect===215==="+address);
             SelectionKey key = registerChannel(id, socketChannel, SelectionKey.OP_CONNECT);
-
             if (connected) {
                 // OP_CONNECT won't trigger for immediately connected channels
                 log.debug("Immediately connected to node {}", id);

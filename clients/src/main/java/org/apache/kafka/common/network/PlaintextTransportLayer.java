@@ -38,8 +38,8 @@ public class PlaintextTransportLayer implements TransportLayer {
     public PlaintextTransportLayer(SelectionKey key) throws IOException {
         this.key = key;
         this.socketChannel = (SocketChannel) key.channel();
+        System.out.println("===PlaintextTransportLayer===41===");//try { Integer.parseInt("PlaintextTransportLayer"); }catch (Exception e){e.printStackTrace();}
     }
-
     @Override
     public boolean ready() {
         return true;

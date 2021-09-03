@@ -782,8 +782,8 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
             if (offsetAndMetadata.offset() < 0) {
                 return RequestFuture.failure(new IllegalArgumentException("Invalid offset: " + offsetAndMetadata.offset()));
             }
-            offsetData.put(entry.getKey(), new OffsetCommitRequest.PartitionData(
-                    offsetAndMetadata.offset(), offsetAndMetadata.metadata()));
+            System.out.println("===sendOffsetCommitRequest===785==="+entry.getKey()+"==="+offsetAndMetadata.offset());//try { Integer.parseInt("OffsetCommitRequest"); }catch (Exception e){e.printStackTrace();}
+            offsetData.put(entry.getKey(), new OffsetCommitRequest.PartitionData(offsetAndMetadata.offset(), offsetAndMetadata.metadata()));
         }
 
         final Generation generation;
@@ -803,7 +803,7 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
                 setRetentionTime(OffsetCommitRequest.DEFAULT_RETENTION_TIME);
 
         log.trace("Sending OffsetCommit request with {} to coordinator {}", offsets, coordinator);
-
+        //System.out.println("===OffsetCommitRequest===806===");//try { Integer.parseInt("OffsetCommitRequest"); }catch (Exception e){e.printStackTrace();}
         return client.send(coordinator, builder)
                 .compose(new OffsetCommitResponseHandler(offsets));
     }

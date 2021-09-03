@@ -446,8 +446,8 @@ public class SubscriptionState {
         return map;
     }
 
-    private static class TopicPartitionState {
-        private Long position; // last consumed position
+    public static class TopicPartitionState {
+        public Long position; // last consumed position
         private Long highWatermark; // the high watermark from last fetch
         private Long logStartOffset; // the log start offset
         private Long lastStableOffset;

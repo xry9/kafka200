@@ -94,7 +94,6 @@ class KafkaApis(val requestChannel: RequestChannel,
   def close() {
     info("Shutdown complete.")
   }
-
   /**
    * Top-level method that handles all requests and multiplexes to the right api
    */
@@ -102,6 +101,7 @@ class KafkaApis(val requestChannel: RequestChannel,
     try {
       trace(s"Handling request:${request.requestDesc(true)} from connection ${request.context.connectionId};" +
         s"securityProtocol:${request.context.securityProtocol},principal:${request.context.principal}")
+      logger.info("===handle===104==="+request.header.apiKey)
       request.header.apiKey match {
         case ApiKeys.PRODUCE => handleProduceRequest(request)
         case ApiKeys.FETCH => handleFetchRequest(request)
@@ -272,7 +272,7 @@ class KafkaApis(val requestChannel: RequestChannel,
   def handleOffsetCommitRequest(request: RequestChannel.Request) {
     val header = request.header
     val offsetCommitRequest = request.body[OffsetCommitRequest]
-
+    logger.info("===handleOffsetCommitRequest===275===")
     // reject the request if not authorized to the group
     if (!authorize(request.session, Read, Resource(Group, offsetCommitRequest.groupId, LITERAL))) {
       val error = Errors.GROUP_AUTHORIZATION_FAILED
@@ -362,7 +362,7 @@ class KafkaApis(val requestChannel: RequestChannel,
             }
           )
         }
-
+        logger.info("===handleOffsetCommitRequest===365===")
         // call coordinator to handle commit offset
         groupCoordinator.handleCommitOffsets(
           offsetCommitRequest.groupId,
@@ -892,7 +892,7 @@ class KafkaApis(val requestChannel: RequestChannel,
     // constant time access while being safe to use with concurrent collections unlike `toArray`.
     val segments = log.logSegments.toBuffer
     val lastSegmentHasSize = segments.last.size > 0
-
+    logger.info("===fetchOffsetsBefore===895===")
     val offsetTimeArray =
       if (lastSegmentHasSize)
         new Array[(Long, Long)](segments.length + 1)

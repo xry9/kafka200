@@ -1303,13 +1303,13 @@ class KafkaZkClient private (zooKeeperClient: ZooKeeperClient, isSecure: Boolean
    */
   def setOrCreateConsumerOffset(group: String, topicPartition: TopicPartition, offset: Long): Unit = {
     val setDataResponse = setConsumerOffset(group, topicPartition, offset)
+    logger.info("===setOrCreateConsumerOffset===1306==="+group+"==="+topicPartition+"==="+offset)
     if (setDataResponse.resultCode == Code.NONODE) {
       createConsumerOffset(group, topicPartition, offset)
     } else {
       setDataResponse.maybeThrow
     }
   }
-
   /**
     * Get the cluster id.
     * @return optional cluster id in String.

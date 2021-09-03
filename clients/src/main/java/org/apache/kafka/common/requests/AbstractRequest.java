@@ -15,18 +15,18 @@
  * limitations under the License.
  */
 package org.apache.kafka.common.requests;
-
 import org.apache.kafka.common.network.NetworkSend;
 import org.apache.kafka.common.network.Send;
 import org.apache.kafka.common.protocol.ApiKeys;
 import org.apache.kafka.common.protocol.Errors;
 import org.apache.kafka.common.protocol.types.Struct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
-
 public abstract class AbstractRequest extends AbstractRequestResponse {
-
+    private static final Logger log = LoggerFactory.getLogger(AbstractRequest.class);
     public static abstract class Builder<T extends AbstractRequest> {
         private final ApiKeys apiKey;
         private final short oldestAllowedVersion;
@@ -132,7 +132,6 @@ public abstract class AbstractRequest extends AbstractRequestResponse {
         else
             return response.errorCounts();
     }
-
     /**
      * Factory method for getting a request object based on ApiKey ID and a version
      */
@@ -147,6 +146,7 @@ public abstract class AbstractRequest extends AbstractRequestResponse {
             case METADATA:
                 return new MetadataRequest(struct, apiVersion);
             case OFFSET_COMMIT:
+                //System.out.println("===OffsetCommitRequest===149===");
                 return new OffsetCommitRequest(struct, apiVersion);
             case OFFSET_FETCH:
                 return new OffsetFetchRequest(struct, apiVersion);

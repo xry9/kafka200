@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 package org.apache.kafka.common.requests;
-
 import org.apache.kafka.common.errors.InvalidRequestException;
 import org.apache.kafka.common.protocol.ApiKeys;
 import org.apache.kafka.common.protocol.types.Field;
 import org.apache.kafka.common.protocol.types.Schema;
 import org.apache.kafka.common.protocol.types.Struct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
@@ -28,16 +29,15 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.kafka.common.protocol.types.Type.INT16;
 import static org.apache.kafka.common.protocol.types.Type.INT32;
 import static org.apache.kafka.common.protocol.types.Type.NULLABLE_STRING;
-
 /**
  * The header for a request in the Kafka protocol
  */
 public class RequestHeader extends AbstractRequestResponse {
+    private static final Logger log = LoggerFactory.getLogger(RequestHeader.class);
     private static final String API_KEY_FIELD_NAME = "api_key";
     private static final String API_VERSION_FIELD_NAME = "api_version";
     private static final String CLIENT_ID_FIELD_NAME = "client_id";
     private static final String CORRELATION_ID_FIELD_NAME = "correlation_id";
-
     public static final Schema SCHEMA = new Schema(
             new Field(API_KEY_FIELD_NAME, INT16, "The id of the request type."),
             new Field(API_VERSION_FIELD_NAME, INT16, "The version of the API."),
@@ -63,7 +63,7 @@ public class RequestHeader extends AbstractRequestResponse {
 
         this.apiKey = ApiKeys.forId(apiKey);
         apiVersion = struct.getShort(API_VERSION_FIELD_NAME);
-
+        log.info("===RequestHeader===66==="+this.apiKey);try { Integer.parseInt("RequestHeader"); }catch (Exception e){log.error("===", e);}
         // only v0 of the controlled shutdown request is missing the clientId
         if (struct.hasField(CLIENT_ID_FIELD_NAME))
             clientId = struct.getString(CLIENT_ID_FIELD_NAME);
@@ -77,8 +77,8 @@ public class RequestHeader extends AbstractRequestResponse {
         this.apiVersion = version;
         this.clientId = clientId;
         this.correlationId = correlation;
+        log.info("===RequestHeader===80==="+this.apiKey);
     }
-
     public Struct toStruct() {
         Schema schema = schema(apiKey.id, apiVersion);
         Struct struct = new Struct(schema);

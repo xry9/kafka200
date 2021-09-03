@@ -51,9 +51,9 @@ public class AbstractConfig {
     private final Map<String, Object> values;
 
     private final ConfigDef definition;
-
     @SuppressWarnings("unchecked")
     public AbstractConfig(ConfigDef definition, Map<?, ?> originals, boolean doLog) {
+        log.info("===AbstractConfig===56===");//try { Integer.parseInt("AbstractConfig"); }catch (Exception e){log.error("===", e);}
         /* check that all the keys are really strings */
         for (Map.Entry<?, ?> entry : originals.entrySet())
             if (!(entry.getKey() instanceof String))

@@ -89,9 +89,9 @@ public class KafkaChannel {
     private boolean disconnected;
     private ChannelMuteState muteState;
     private ChannelState state;
-
     public KafkaChannel(String id, TransportLayer transportLayer, Authenticator authenticator, int maxReceiveSize, MemoryPool memoryPool) throws IOException {
         this.id = id;
+        System.out.println("===KafkaChannel===94==="+transportLayer.getClass().getName());
         this.transportLayer = transportLayer;
         this.authenticator = authenticator;
         this.networkThreadTimeNanos = 0L;

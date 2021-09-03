@@ -16,6 +16,7 @@
  */
 package org.apache.kafka.common.internals;
 
+import org.apache.kafka.clients.consumer.internals.SubscriptionState;
 import org.apache.kafka.common.TopicPartition;
 
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 /**
  * This class is a useful building block for doing fetch requests where topic partitions have to be rotated via
  * round-robin to ensure fairness and some level of determinism given the existence of a limit on the fetch response
@@ -46,14 +46,14 @@ public class PartitionStates<S> {
     public void moveToEnd(TopicPartition topicPartition) {
         S state = map.remove(topicPartition);
         if (state != null)
+            //System.out.println("===put===49==="+topicPartition+"==="+((SubscriptionState.TopicPartitionState)state).position);try { Integer.parseInt("put"); }catch (Exception e){e.printStackTrace();}
             map.put(topicPartition, state);
     }
-
     public void updateAndMoveToEnd(TopicPartition topicPartition, S state) {
         map.remove(topicPartition);
+        System.out.println("===put===54===");
         map.put(topicPartition, state);
     }
-
     public void remove(TopicPartition topicPartition) {
         map.remove(topicPartition);
     }
@@ -123,11 +123,11 @@ public class PartitionStates<S> {
         for (Map.Entry<String, List<TopicPartition>> entry : topicToPartitions.entrySet()) {
             for (TopicPartition tp : entry.getValue()) {
                 S state = partitionToState.get(tp);
+                System.out.println("===put===126==="+tp+"==="+((SubscriptionState.TopicPartitionState)state).position);
                 map.put(tp, state);
             }
         }
     }
-
     public static class PartitionState<S> {
         private final TopicPartition topicPartition;
         private final S value;

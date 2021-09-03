@@ -616,8 +616,8 @@ class Partition(val topic: String,
           throw e
     }
   }
-
   def appendRecordsToLeader(records: MemoryRecords, isFromClient: Boolean, requiredAcks: Int = 0): LogAppendInfo = {
+    logger.info("===appendRecordsToLeader===620==="+records.sizeInBytes()+"===");try { Integer.parseInt("appendRecordsToLeader") }catch { case e: Exception =>error("===", e) }
     val (info, leaderHWIncremented) = inReadLock(leaderIsrUpdateLock) {
       leaderReplicaIfLocal match {
         case Some(leaderReplica) =>

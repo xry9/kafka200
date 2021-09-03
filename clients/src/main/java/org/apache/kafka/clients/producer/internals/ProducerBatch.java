@@ -90,9 +90,9 @@ public final class ProducerBatch {
         this.produceFuture = new ProduceRequestResult(topicPartition);
         this.retry = false;
         this.isSplitBatch = isSplitBatch;
-        float compressionRatioEstimation = CompressionRatioEstimator.estimation(topicPartition.topic(),
-                                                                                recordsBuilder.compressionType());
+        float compressionRatioEstimation = CompressionRatioEstimator.estimation(topicPartition.topic(), recordsBuilder.compressionType());
         recordsBuilder.setEstimatedCompressionRatio(compressionRatioEstimation);
+        System.out.println("===ProducerBatch===95===");//try { Integer.parseInt("ProducerBatch"); }catch (Exception e){e.printStackTrace();}
     }
 
     /**
@@ -112,10 +112,10 @@ public final class ProducerBatch {
                                                                    timestamp, checksum,
                                                                    key == null ? -1 : key.length,
                                                                    value == null ? -1 : value.length);
-            // we have to keep every future returned to the users in case the batch needs to be
-            // split to several new batches and resent.
+            // we have to keep every future returned to the users in case the batch needs to be split to several new batches and resent.
             thunks.add(new Thunk(callback, future));
             this.recordCount++;
+            //System.out.println("===tryAppend===118==="+recordCount+"===");
             return future;
         }
     }

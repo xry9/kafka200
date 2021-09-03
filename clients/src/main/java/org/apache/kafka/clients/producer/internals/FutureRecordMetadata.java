@@ -83,12 +83,12 @@ public final class FutureRecordMetadata implements Future<RecordMetadata> {
      * old big batch has been deemed as done.
      */
     void chain(FutureRecordMetadata futureRecordMetadata) {
+
         if (nextRecordMetadata == null)
             nextRecordMetadata = futureRecordMetadata;
         else
             nextRecordMetadata.chain(futureRecordMetadata);
     }
-
     RecordMetadata valueOrError() throws ExecutionException {
         if (this.result.error() != null)
             throw new ExecutionException(this.result.error());

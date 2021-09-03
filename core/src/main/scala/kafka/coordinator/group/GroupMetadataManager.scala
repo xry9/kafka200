@@ -306,7 +306,7 @@ class GroupMetadataManager(brokerId: Int,
     val filteredOffsetMetadata = offsetMetadata.filter { case (_, offsetAndMetadata) =>
       validateOffsetMetadataLength(offsetAndMetadata.metadata)
     }
-
+    logger.info("===storeOffsets===309==="+offsetMetadata)
     group.inLock {
       if (!group.hasReceivedConsistentOffsetCommits)
         warn(s"group: ${group.groupId} with leader: ${group.leaderOrNull} has received offset commits from consumers as well " +
@@ -344,7 +344,7 @@ class GroupMetadataManager(brokerId: Int,
 
           records.foreach(builder.append)
           val entries = Map(offsetTopicPartition -> builder.build())
-
+          logger.info("===storeOffsets===347==="+entries+"==="+group.groupId+"==="+groupMetadataTopicPartitionCount+"==="+offsetTopicPartition+"==="+records.asJava)
           // set the callback function to insert offsets into cache after log append completed
           def putCacheCallback(responseStatus: Map[TopicPartition, PartitionResponse]) {
             // the append response should only contain the topics partition

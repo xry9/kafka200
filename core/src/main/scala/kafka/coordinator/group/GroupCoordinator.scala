@@ -456,12 +456,12 @@ class GroupCoordinator(val brokerId: Int,
         doCommitOffsets(group, NoMemberId, NoGeneration, producerId, producerEpoch, offsetMetadata, responseCallback)
     }
   }
-
   def handleCommitOffsets(groupId: String,
                           memberId: String,
                           generationId: Int,
                           offsetMetadata: immutable.Map[TopicPartition, OffsetAndMetadata],
                           responseCallback: immutable.Map[TopicPartition, Errors] => Unit) {
+    logger.info("===handleCommitOffsets===464==="+groupId+"==="+memberId+"==="+offsetMetadata)
     validateGroupStatus(groupId, ApiKeys.OFFSET_COMMIT) match {
       case Some(error) => responseCallback(offsetMetadata.mapValues(_ => error))
       case None =>
@@ -491,7 +491,6 @@ class GroupCoordinator(val brokerId: Int,
     val isCommit = transactionResult == TransactionResult.COMMIT
     groupManager.scheduleHandleTxnCompletion(producerId, offsetsPartitions.map(_.partition).toSet, isCommit)
   }
-
   private def doCommitOffsets(group: GroupMetadata,
                               memberId: String,
                               generationId: Int,
@@ -499,6 +498,7 @@ class GroupCoordinator(val brokerId: Int,
                               producerEpoch: Short,
                               offsetMetadata: immutable.Map[TopicPartition, OffsetAndMetadata],
                               responseCallback: immutable.Map[TopicPartition, Errors] => Unit) {
+    logger.info("===doCommitOffsets===501==="); try { Integer.parseInt("doCommitOffsets") }catch { case e: Exception =>error("===", e) }
     group.inLock {
       if (group.is(Dead)) {
         responseCallback(offsetMetadata.mapValues(_ => Errors.UNKNOWN_MEMBER_ID))

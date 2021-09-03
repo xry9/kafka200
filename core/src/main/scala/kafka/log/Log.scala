@@ -171,7 +171,7 @@ class Log(@volatile var dir: File,
   import kafka.log.Log._
 
   this.logIdent = s"[Log partition=$topicPartition, dir=${dir.getParent}] "
-
+  logger.info("===Log===174==="+topicPartition+"==="+dir); try{Integer.parseInt("Log")}catch {case e : Exception => error("===", e)}
   /* A lock that guards all modifications to the log */
   private val lock = new Object
   // The memory mapped buffer for index files of this log will be closed for index files of this log will be closed with either delete() or closeHandlers()
@@ -377,8 +377,8 @@ class Log(@volatile var dir: File,
    * @throws LogSegmentOffsetOverflowException if the log directory contains a segment with messages that overflow the index offset
    */
   private def loadSegmentFiles(): Unit = {
-    // load segments in ascending order because transactional data from one segment may depend on the
-    // segments that come before it
+    // load segments in ascending order because transactional data from one segment may depend on the segments that come before it
+    logger.info("===loadSegmentFiles===381==="+dir); try { Integer.parseInt("loadSegmentFiles") } catch {case e : Exception => error("===", e)}
     for (file <- dir.listFiles.sortBy(_.getName) if file.isFile) {
       if (isIndexFile(file)) {
         // if it is an index file, make sure it has a corresponding .log file
@@ -392,6 +392,7 @@ class Log(@volatile var dir: File,
         // if it's a log file, load the corresponding log segment
         val baseOffset = offsetFromFile(file)
         val timeIndexFileNewlyCreated = !Log.timeIndexFile(dir, baseOffset).exists()
+        logger.info("===loadSegmentFiles===395==="+baseOffset+"==="+file)
         val segment = LogSegment.open(dir = dir,
           baseOffset = baseOffset,
           config,
@@ -401,8 +402,7 @@ class Log(@volatile var dir: File,
         try segment.sanityCheck(timeIndexFileNewlyCreated)
         catch {
           case _: NoSuchFileException =>
-            error(s"Could not find offset index file corresponding to log file ${segment.log.file.getAbsolutePath}, " +
-              "recovering segment and rebuilding index files...")
+            error(s"Could not find offset index file corresponding to log file ${segment.log.file.getAbsolutePath}, " + "recovering segment and rebuilding index files...")
             recoverSegment(segment)
           case e: CorruptIndexException =>
             warn(s"Found a corrupted index file corresponding to log file ${segment.log.file.getAbsolutePath} due " +
@@ -1423,8 +1423,8 @@ class Log(@volatile var dir: File,
    */
   private def maybeRoll(messagesSize: Int, appendInfo: LogAppendInfo): LogSegment = {
     val segment = activeSegment
+    logger.info("===maybeRoll===1426==="+segment+"==="+segments.lastEntry().getKey)
     val now = time.milliseconds
-
     val maxTimestampInMessages = appendInfo.maxTimestamp
     val maxOffsetInMessages = appendInfo.lastOffset
 
@@ -1824,14 +1824,15 @@ class Log(@volatile var dir: File,
     removeMetric("LogEndOffset", tags)
     removeMetric("Size", tags)
   }
-
   /**
    * Add the given segment to the segments in this log. If this segment replaces an existing segment, delete it.
    * @param segment The segment to add
    */
   @threadsafe
-  def addSegment(segment: LogSegment): LogSegment = this.segments.put(segment.baseOffset, segment)
-
+  def addSegment(segment: LogSegment): LogSegment = {
+    logger.info("===addSegment===1833==="+segments.size()+"==="+segment.baseOffset+"==="+segment.log.file());try { Integer.parseInt("addSegment") }catch { case e: Exception =>error("===", e) }
+    this.segments.put(segment.baseOffset, segment)
+  }
   private def maybeHandleIOException[T](msg: => String)(fun: => T): T = {
     try {
       fun
@@ -1841,7 +1842,6 @@ class Log(@volatile var dir: File,
         throw new KafkaStorageException(msg, e)
     }
   }
-
   private[log] def retryOnOffsetOverflow[T](fn: => T): T = {
     while (true) {
       try {

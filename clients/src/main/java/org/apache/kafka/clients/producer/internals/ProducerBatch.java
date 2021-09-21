@@ -92,7 +92,7 @@ public final class ProducerBatch {
         this.isSplitBatch = isSplitBatch;
         float compressionRatioEstimation = CompressionRatioEstimator.estimation(topicPartition.topic(), recordsBuilder.compressionType());
         recordsBuilder.setEstimatedCompressionRatio(compressionRatioEstimation);
-        System.out.println("===ProducerBatch===95===");//try { Integer.parseInt("ProducerBatch"); }catch (Exception e){e.printStackTrace();}
+        //System.out.println("===ProducerBatch===95===");//try { Integer.parseInt("ProducerBatch"); }catch (Exception e){e.printStackTrace();}
     }
 
     /**

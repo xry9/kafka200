@@ -169,13 +169,13 @@ case class CommitRecordMetadataAndOffset(appendedBatchOffset: Option[Long], offs
 @nonthreadsafe
 private[group] class GroupMetadata(val groupId: String, initialState: GroupState) extends Logging {
   private[group] val lock = new ReentrantLock
+  info("===GroupMetadata===172==="+groupId+"==="+this.hashCode()); try { Integer.parseInt("GroupMetadata") }catch {case e:Exception => error("===", e)}
 
   private var state: GroupState = initialState
   var protocolType: Option[String] = None
   var generationId = 0
   private var leaderId: Option[String] = None
   private var protocol: Option[String] = None
-
   private val members = new mutable.HashMap[String, MemberMetadata]
   private val offsets = new mutable.HashMap[TopicPartition, CommitRecordMetadataAndOffset]
   private val pendingOffsetCommits = new mutable.HashMap[TopicPartition, OffsetAndMetadata]
@@ -311,19 +311,19 @@ private[group] class GroupMetadata(val groupId: String, initialState: GroupState
 
   def initializeOffsets(offsets: collection.Map[TopicPartition, CommitRecordMetadataAndOffset],
                         pendingTxnOffsets: Map[Long, mutable.Map[TopicPartition, CommitRecordMetadataAndOffset]]) {
+    info("===initializeOffsets===314==="+offsets)
     this.offsets ++= offsets
     this.pendingTransactionalOffsetCommits ++= pendingTxnOffsets
   }
-
   def onOffsetCommitAppend(topicPartition: TopicPartition, offsetWithCommitRecordMetadata: CommitRecordMetadataAndOffset) {
     if (pendingOffsetCommits.contains(topicPartition)) {
       if (offsetWithCommitRecordMetadata.appendedBatchOffset.isEmpty)
-        throw new IllegalStateException("Cannot complete offset commit write without providing the metadata of the record " +
-          "in the log.")
-      if (!offsets.contains(topicPartition) || offsets(topicPartition).olderThan(offsetWithCommitRecordMetadata))
+        throw new IllegalStateException("Cannot complete offset commit write without providing the metadata of the record " + "in the log.")
+      if (!offsets.contains(topicPartition) || offsets(topicPartition).olderThan(offsetWithCommitRecordMetadata)) {
         offsets.put(topicPartition, offsetWithCommitRecordMetadata)
+        info("===offsets===324==="+this.hashCode()+"==="+groupId+"==="+topicPartition+"==="+offsetWithCommitRecordMetadata); try { Integer.parseInt("offsets") }catch {case e:Exception => error("===", e)}
+      }
     }
-
     pendingOffsetCommits.get(topicPartition) match {
       case Some(stagedOffset) if offsetWithCommitRecordMetadata.offsetAndMetadata == stagedOffset =>
         pendingOffsetCommits.remove(topicPartition)
@@ -402,8 +402,8 @@ private[group] class GroupMetadata(val groupId: String, initialState: GroupState
 
           val currentOffsetOpt = offsets.get(topicPartition)
           if (currentOffsetOpt.forall(_.olderThan(commitRecordMetadataAndOffset))) {
-            trace(s"TxnOffsetCommit for producer $producerId and group $groupId with offset $commitRecordMetadataAndOffset " +
-              "committed and loaded into the cache.")
+            trace(s"TxnOffsetCommit for producer $producerId and group $groupId with offset $commitRecordMetadataAndOffset " + "committed and loaded into the cache.")
+            info("===offsets===406==="+groupId+"==="+topicPartition+"==="+commitRecordMetadataAndOffset)
             offsets.put(topicPartition, commitRecordMetadataAndOffset)
           } else {
             trace(s"TxnOffsetCommit for producer $producerId and group $groupId with offset $commitRecordMetadataAndOffset " +
@@ -451,12 +451,12 @@ private[group] class GroupMetadata(val groupId: String, initialState: GroupState
   def allOffsets = offsets.map { case (topicPartition, commitRecordMetadataAndOffset) =>
     (topicPartition, commitRecordMetadataAndOffset.offsetAndMetadata)
   }.toMap
-
-  def offset(topicPartition: TopicPartition): Option[OffsetAndMetadata] = offsets.get(topicPartition).map(_.offsetAndMetadata)
-
+  def offset(topicPartition: TopicPartition): Option[OffsetAndMetadata] = {
+    info("===offset===455==="+offsets.size+"==="+offsets)
+    offsets.get(topicPartition).map(_.offsetAndMetadata)
+  }
   // visible for testing
   private[group] def offsetWithRecordMetadata(topicPartition: TopicPartition): Option[CommitRecordMetadataAndOffset] = offsets.get(topicPartition)
-
   def numOffsets = offsets.size
 
   def hasOffsets = offsets.nonEmpty || pendingOffsetCommits.nonEmpty || pendingTransactionalOffsetCommits.nonEmpty

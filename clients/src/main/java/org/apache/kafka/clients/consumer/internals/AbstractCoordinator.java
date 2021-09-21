@@ -145,8 +145,8 @@ public abstract class AbstractCoordinator implements Closeable {
         this.heartbeat = heartbeat;
         this.sensors = new GroupCoordinatorMetrics(metrics, metricGrpPrefix);
         this.retryBackoffMs = retryBackoffMs;
+        System.out.println("===AbstractCoordinator===148===");//try { Integer.parseInt("AbstractCoordinator"); }catch (Exception e){e.printStackTrace();}
     }
-
     public AbstractCoordinator(LogContext logContext,
                                ConsumerNetworkClient client,
                                String groupId,
@@ -520,8 +520,8 @@ public abstract class AbstractCoordinator implements Closeable {
         // maximum time that it may block on the coordinator. We add an extra 5 seconds for small delays.
 
         int joinGroupTimeoutMs = Math.max(rebalanceTimeoutMs, rebalanceTimeoutMs + 5000);
-        return client.send(coordinator, requestBuilder, joinGroupTimeoutMs)
-                .compose(new JoinGroupResponseHandler());
+        return client.send(coordinator, requestBuilder, joinGroupTimeoutMs).compose(new JoinGroupResponseHandler());
+
     }
 
     private class JoinGroupResponseHandler extends CoordinatorResponseHandler<JoinGroupResponse, ByteBuffer> {

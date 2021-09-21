@@ -212,7 +212,7 @@ public class Selector implements Selectable, AutoCloseable {
         try {
             configureSocketChannel(socketChannel, sendBufferSize, receiveBufferSize);
             boolean connected = doConnect(socketChannel, address);
-            System.out.println("===connect===215==="+address);
+            //System.out.println("===connect===215==="+address);
             SelectionKey key = registerChannel(id, socketChannel, SelectionKey.OP_CONNECT);
             if (connected) {
                 // OP_CONNECT won't trigger for immediately connected channels
@@ -835,7 +835,7 @@ public class Selector implements Selectable, AutoCloseable {
     private void addToStagedReceives(KafkaChannel channel, NetworkReceive receive) {
         if (!stagedReceives.containsKey(channel))
             stagedReceives.put(channel, new ArrayDeque<NetworkReceive>());
-
+        //System.out.println("===addToStagedReceives===838==="+receive.source());
         Deque<NetworkReceive> deque = stagedReceives.get(channel);
         deque.add(receive);
     }

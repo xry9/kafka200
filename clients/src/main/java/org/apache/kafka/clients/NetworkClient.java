@@ -459,10 +459,10 @@ public class NetworkClient implements KafkaClient {
             abortedSends.add(clientResponse);
         }
     }
-
     private void doSend(ClientRequest clientRequest, boolean isInternalRequest, long now, AbstractRequest request) {
         String destination = clientRequest.destination();
         RequestHeader header = clientRequest.makeHeader(request.version());
+        System.out.println("===header===465==="+header.apiKey());
         if (log.isDebugEnabled()) {
             int latestClientVersion = clientRequest.apiKey().latestVersion();
             if (header.apiVersion() == latestClientVersion) {

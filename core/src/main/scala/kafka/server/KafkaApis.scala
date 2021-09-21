@@ -1096,27 +1096,24 @@ class KafkaApis(val requestChannel: RequestChannel,
         completeTopicMetadata.asJava
       ))
   }
-
   /**
    * Handle an offset fetch request
    */
   def handleOffsetFetchRequest(request: RequestChannel.Request) {
     val header = request.header
     val offsetFetchRequest = request.body[OffsetFetchRequest]
-
     def authorizeTopicDescribe(partition: TopicPartition) =
       authorize(request.session, Describe, Resource(Topic, partition.topic, LITERAL))
-
     def createResponse(requestThrottleMs: Int): AbstractResponse = {
+
       val offsetFetchResponse =
         // reject the request if not authorized to the group
-        if (!authorize(request.session, Describe, Resource(Group, offsetFetchRequest.groupId, LITERAL)))
+        if (!authorize(request.session, Describe, Resource(Group, offsetFetchRequest.groupId, LITERAL))){
           offsetFetchRequest.getErrorResponse(requestThrottleMs, Errors.GROUP_AUTHORIZATION_FAILED)
+        }
         else {
           if (header.apiVersion == 0) {
-            val (authorizedPartitions, unauthorizedPartitions) = offsetFetchRequest.partitions.asScala
-              .partition(authorizeTopicDescribe)
-
+            val (authorizedPartitions, unauthorizedPartitions) = offsetFetchRequest.partitions.asScala.partition(authorizeTopicDescribe)
             // version 0 reads offsets from ZK
             val authorizedPartitionData = authorizedPartitions.map { topicPartition =>
               try {
@@ -1126,8 +1123,8 @@ class KafkaApis(val requestChannel: RequestChannel,
                   val payloadOpt = zkClient.getConsumerOffset(offsetFetchRequest.groupId, topicPartition)
                   payloadOpt match {
                     case Some(payload) =>
-                      (topicPartition, new OffsetFetchResponse.PartitionData(
-                          payload.toLong, OffsetFetchResponse.NO_METADATA, Errors.NONE))
+
+                      (topicPartition, new OffsetFetchResponse.PartitionData(payload.toLong, OffsetFetchResponse.NO_METADATA, Errors.NONE))
                     case None =>
                       (topicPartition, OffsetFetchResponse.UNKNOWN_PARTITION)
                   }
@@ -1142,6 +1139,7 @@ class KafkaApis(val requestChannel: RequestChannel,
             val unauthorizedPartitionData = unauthorizedPartitions.map(_ -> OffsetFetchResponse.UNAUTHORIZED_PARTITION).toMap
             new OffsetFetchResponse(requestThrottleMs, Errors.NONE, (authorizedPartitionData ++ unauthorizedPartitionData).asJava)
           } else {
+
             // versions 1 and above read offsets from Kafka
             if (offsetFetchRequest.isAllPartitions) {
               val (error, allPartitionData) = groupCoordinator.handleFetchOffsets(offsetFetchRequest.groupId)
@@ -1153,14 +1151,15 @@ class KafkaApis(val requestChannel: RequestChannel,
                 new OffsetFetchResponse(requestThrottleMs, Errors.NONE, authorizedPartitionData.asJava)
               }
             } else {
-              val (authorizedPartitions, unauthorizedPartitions) = offsetFetchRequest.partitions.asScala
-                .partition(authorizeTopicDescribe)
-              val (error, authorizedPartitionData) = groupCoordinator.handleFetchOffsets(offsetFetchRequest.groupId,
-                Some(authorizedPartitions))
+              val (authorizedPartitions, unauthorizedPartitions) = offsetFetchRequest.partitions.asScala.partition(authorizeTopicDescribe)
+
+              val (error, authorizedPartitionData) = groupCoordinator.handleFetchOffsets(offsetFetchRequest.groupId, Some(authorizedPartitions))
+              info("===createResponse===1157==="+offsetFetchRequest.groupId+"==="+offsetFetchRequest.partitions()+"==="+(error != Errors.NONE))// +"==="+unauthorizedPartitions
               if (error != Errors.NONE)
                 offsetFetchRequest.getErrorResponse(requestThrottleMs, error)
               else {
                 val unauthorizedPartitionData = unauthorizedPartitions.map(_ -> OffsetFetchResponse.UNAUTHORIZED_PARTITION).toMap
+                info("===createResponse===1162==="+authorizedPartitionData+"==="+unauthorizedPartitionData)
                 new OffsetFetchResponse(requestThrottleMs, Errors.NONE, (authorizedPartitionData ++ unauthorizedPartitionData).asJava)
               }
             }

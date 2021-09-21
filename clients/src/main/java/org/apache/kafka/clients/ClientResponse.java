@@ -58,6 +58,7 @@ public class ClientResponse {
                           AuthenticationException authenticationException,
                           AbstractResponse responseBody) {
         this.requestHeader = requestHeader;
+        System.out.println("===ClientResponse===61==="+requestHeader.apiKey());
         this.callback = callback;
         this.destination = destination;
         this.receivedTimeMs = receivedTimeMs;
@@ -67,7 +68,6 @@ public class ClientResponse {
         this.authenticationException = authenticationException;
         this.responseBody = responseBody;
     }
-
     public long receivedTimeMs() {
         return receivedTimeMs;
     }

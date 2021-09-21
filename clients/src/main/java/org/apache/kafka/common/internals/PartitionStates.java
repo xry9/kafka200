@@ -123,7 +123,7 @@ public class PartitionStates<S> {
         for (Map.Entry<String, List<TopicPartition>> entry : topicToPartitions.entrySet()) {
             for (TopicPartition tp : entry.getValue()) {
                 S state = partitionToState.get(tp);
-                System.out.println("===put===126==="+tp+"==="+((SubscriptionState.TopicPartitionState)state).position);
+                System.out.println("===put===126==="+tp+"==="+state+"==="+((SubscriptionState.TopicPartitionState)state).position); //try { Integer.parseInt("put"); }catch (Exception e){e.printStackTrace();}
                 map.put(tp, state);
             }
         }

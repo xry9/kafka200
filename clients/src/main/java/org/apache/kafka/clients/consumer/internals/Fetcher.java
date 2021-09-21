@@ -224,10 +224,10 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
                                 long fetchOffset = data.sessionPartitions().get(partition).fetchOffset;
                                 FetchResponse.PartitionData fetchData = entry.getValue();
 
-                                log.debug("Fetch {} at offset {} for partition {} returned fetch data {}",
-                                        isolationLevel, fetchOffset, partition, fetchData);
-                                completedFetches.add(new CompletedFetch(partition, fetchOffset, fetchData, metricAggregator,
-                                        resp.requestHeader().apiVersion()));
+                                log.debug("Fetch {} at offset {} for partition {} returned fetch data {}", isolationLevel, fetchOffset, partition, fetchData);
+                                //System.out.println("===sendFetches===228==="+fetchOffset);
+                                completedFetches.add(new CompletedFetch(partition, fetchOffset, fetchData, metricAggregator, resp.requestHeader().apiVersion()));
+
                             }
 
                             sensors.fetchLatency.record(resp.requestLatencyMs());
@@ -544,8 +544,8 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
                 List<ConsumerRecord<K, V>> partRecords = partitionRecords.fetchRecords(maxRecords);
 
                 long nextOffset = partitionRecords.nextFetchOffset;
-                log.trace("Returning fetched records at offset {} for assigned partition {} and update " +
-                        "position to {}", position, partitionRecords.partition, nextOffset);
+                log.trace("Returning fetched records at offset {} for assigned partition {} and update " + "position to {}", position, partitionRecords.partition, nextOffset);
+
                 subscriptions.position(partitionRecords.partition, nextOffset);
 
                 Long partitionLag = subscriptions.partitionLag(partitionRecords.partition, isolationLevel);
@@ -874,13 +874,13 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
                     builder = handler.newBuilder();
                     fetchable.put(node, builder);
                 }
-
                 long position = this.subscriptions.position(partition);
-                builder.add(partition, new FetchRequest.PartitionData(position, FetchRequest.INVALID_LOG_START_OFFSET,
-                    this.fetchSize));
+                //System.out.println("===prepareFetchRequests===878==="+partition+"==="+position);
 
-                log.debug("Added {} fetch request for partition {} at offset {} to node {}", isolationLevel,
-                    partition, position, node);
+                builder.add(partition, new FetchRequest.PartitionData(position, FetchRequest.INVALID_LOG_START_OFFSET, this.fetchSize));
+
+                log.debug("Added {} fetch request for partition {} at offset {} to node {}", isolationLevel, partition, position, node);
+
             }
         }
         Map<Node, FetchSessionHandler.FetchRequestData> reqs = new LinkedHashMap<>();

@@ -67,7 +67,7 @@ public final class ProduceRequestResult {
         if (baseOffset == null)
             throw new IllegalStateException("The method `set` must be invoked before this method.");
         this.latch.countDown();
-        System.out.println("===done===70===");//try { Integer.parseInt("done"); }catch (Exception e){e.printStackTrace();}
+        //System.out.println("===done===70===");//try { Integer.parseInt("done"); }catch (Exception e){e.printStackTrace();}
     }
     /**
      * Await the completion of this request

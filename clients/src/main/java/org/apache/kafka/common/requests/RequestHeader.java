@@ -63,7 +63,7 @@ public class RequestHeader extends AbstractRequestResponse {
 
         this.apiKey = ApiKeys.forId(apiKey);
         apiVersion = struct.getShort(API_VERSION_FIELD_NAME);
-        log.info("===RequestHeader===66==="+this.apiKey);try { Integer.parseInt("RequestHeader"); }catch (Exception e){log.error("===", e);}
+        log.info("===RequestHeader===66==="+this.apiKey);//try { Integer.parseInt("RequestHeader"); }catch (Exception e){log.error("===", e);}
         // only v0 of the controlled shutdown request is missing the clientId
         if (struct.hasField(CLIENT_ID_FIELD_NAME))
             clientId = struct.getString(CLIENT_ID_FIELD_NAME);

@@ -535,12 +535,12 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
 
             // contact coordinator to fetch committed offsets
             final RequestFuture<Map<TopicPartition, OffsetAndMetadata>> future;
+            System.out.println("===fetchCommittedOffsets===538==="+(pendingCommittedOffsetRequest != null)+"==="+partitions);
             if (pendingCommittedOffsetRequest != null) {
                 future = pendingCommittedOffsetRequest.response;
             } else {
                 future = sendOffsetFetchRequest(partitions);
                 pendingCommittedOffsetRequest = new PendingCommittedOffsetRequest(partitions, generation, future);
-
             }
             client.poll(future, remainingTimeAtLeastZero(timeoutMs, elapsedTime));
 
@@ -782,7 +782,7 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
             if (offsetAndMetadata.offset() < 0) {
                 return RequestFuture.failure(new IllegalArgumentException("Invalid offset: " + offsetAndMetadata.offset()));
             }
-            System.out.println("===sendOffsetCommitRequest===785==="+entry.getKey()+"==="+offsetAndMetadata.offset());//try { Integer.parseInt("OffsetCommitRequest"); }catch (Exception e){e.printStackTrace();}
+            //System.out.println("===sendOffsetCommitRequest===785==="+entry.getKey()+"==="+offsetAndMetadata.offset());//try { Integer.parseInt("OffsetCommitRequest"); }catch (Exception e){e.printStackTrace();}
             offsetData.put(entry.getKey(), new OffsetCommitRequest.PartitionData(offsetAndMetadata.offset(), offsetAndMetadata.metadata()));
         }
 
@@ -889,13 +889,13 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
             return RequestFuture.coordinatorNotAvailable();
 
         log.debug("Fetching committed offsets for partitions: {}", partitions);
+
         // construct the request
-        OffsetFetchRequest.Builder requestBuilder = new OffsetFetchRequest.Builder(this.groupId,
-                new ArrayList<>(partitions));
+        OffsetFetchRequest.Builder requestBuilder = new OffsetFetchRequest.Builder(this.groupId, new ArrayList<>(partitions));
 
         // send the request with a callback
-        return client.send(coordinator, requestBuilder)
-                .compose(new OffsetFetchResponseHandler());
+        return client.send(coordinator, requestBuilder).compose(new OffsetFetchResponseHandler());
+
     }
 
     private class OffsetFetchResponseHandler extends CoordinatorResponseHandler<OffsetFetchResponse, Map<TopicPartition, OffsetAndMetadata>> {

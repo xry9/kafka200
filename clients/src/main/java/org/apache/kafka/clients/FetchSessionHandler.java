@@ -70,8 +70,8 @@ public class FetchSessionHandler {
     /**
      * All of the partitions which exist in the fetch request session.
      */
-    private LinkedHashMap<TopicPartition, PartitionData> sessionPartitions =
-        new LinkedHashMap<>(0);
+    private LinkedHashMap<TopicPartition, PartitionData> sessionPartitions = new LinkedHashMap<>(0);
+
 
     public static class FetchRequestData {
         /**

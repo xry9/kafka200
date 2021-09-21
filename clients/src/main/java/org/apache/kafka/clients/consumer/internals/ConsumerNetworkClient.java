@@ -413,8 +413,8 @@ public class ConsumerNetworkClient implements Closeable {
         // and set the disconnect flag in the ClientResponse
         for (Node node : unsent.nodes()) {
             if (client.connectionFailed(node)) {
-                // Remove entry before invoking request callback to avoid callbacks handling
-                // coordinator failures traversing the unsent list again.
+                // Remove entry before invoking request callback to avoid callbacks handling coordinator failures traversing the unsent list again.
+
                 Collection<ClientRequest> requests = unsent.remove(node);
                 for (ClientRequest request : requests) {
                     RequestFutureCompletionHandler handler = (RequestFutureCompletionHandler) request.callback();

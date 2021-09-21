@@ -38,7 +38,7 @@ public class PlaintextTransportLayer implements TransportLayer {
     public PlaintextTransportLayer(SelectionKey key) throws IOException {
         this.key = key;
         this.socketChannel = (SocketChannel) key.channel();
-        System.out.println("===PlaintextTransportLayer===41===");//try { Integer.parseInt("PlaintextTransportLayer"); }catch (Exception e){e.printStackTrace();}
+        //System.out.println("===PlaintextTransportLayer===41==="+this.socketChannel.getRemoteAddress()+"==="+this.socketChannel.getLocalAddress()+"==="+this.socketChannel.getClass().getName());//try { Integer.parseInt("PlaintextTransportLayer"); }catch (Exception e){e.printStackTrace();}
     }
     @Override
     public boolean ready() {
@@ -101,9 +101,9 @@ public class PlaintextTransportLayer implements TransportLayer {
     */
     @Override
     public int read(ByteBuffer dst) throws IOException {
+        System.out.println("===read===104==="); //try { Integer.parseInt("read"); }catch (Exception e){e.printStackTrace();}
         return socketChannel.read(dst);
     }
-
     /**
      * Reads a sequence of bytes from this channel into the given buffers.
      *
@@ -113,9 +113,9 @@ public class PlaintextTransportLayer implements TransportLayer {
      */
     @Override
     public long read(ByteBuffer[] dsts) throws IOException {
+        System.out.println("===read===116===");
         return socketChannel.read(dsts);
     }
-
     /**
      * Reads a sequence of bytes from this channel into a subsequence of the given buffers.
      * @param dsts - The buffers into which bytes are to be transferred
@@ -126,9 +126,9 @@ public class PlaintextTransportLayer implements TransportLayer {
      */
     @Override
     public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
+        System.out.println("===read===129===");
         return socketChannel.read(dsts, offset, length);
     }
-
     /**
     * Writes a sequence of bytes to this channel from the given buffer.
     *
@@ -138,9 +138,9 @@ public class PlaintextTransportLayer implements TransportLayer {
     */
     @Override
     public int write(ByteBuffer src) throws IOException {
+        System.out.println("===write===141===");
         return socketChannel.write(src);
     }
-
     /**
     * Writes a sequence of bytes to this channel from the given buffer.
     *
@@ -150,9 +150,9 @@ public class PlaintextTransportLayer implements TransportLayer {
     */
     @Override
     public long write(ByteBuffer[] srcs) throws IOException {
+        System.out.println("===write===153===");
         return socketChannel.write(srcs);
     }
-
     /**
     * Writes a sequence of bytes to this channel from the subsequence of the given buffers.
     *
@@ -164,9 +164,9 @@ public class PlaintextTransportLayer implements TransportLayer {
     */
     @Override
     public long write(ByteBuffer[] srcs, int offset, int length) throws IOException {
+        System.out.println("===write===167===");
         return socketChannel.write(srcs, offset, length);
     }
-
     /**
      * always returns false as there will be not be any
      * pending writes since we directly write to socketChannel.

@@ -494,9 +494,9 @@ public class SubscriptionState {
         private boolean isMissingPosition() {
             return !hasValidPosition() && !awaitingReset();
         }
-
         private void seek(long offset) {
             this.position = offset;
+            //System.out.println("===position===499==="+position);//try { Integer.parseInt("position"); }catch (Exception e){e.printStackTrace();}
             this.resetStrategy = null;
             this.nextAllowedRetryTimeMs = null;
         }
@@ -505,8 +505,8 @@ public class SubscriptionState {
             if (!hasValidPosition())
                 throw new IllegalStateException("Cannot set a new position without a valid current position");
             this.position = offset;
+            //System.out.println("===position===508==="+position);//try { Integer.parseInt("position"); }catch (Exception e){e.printStackTrace();}
         }
-
         private void pause() {
             this.paused = true;
         }

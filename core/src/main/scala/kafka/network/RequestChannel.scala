@@ -243,12 +243,12 @@ object RequestChannel extends Logging {
                      val responseSend: Send,
                      val responseAsString: Option[String],
                      val onCompleteCallback: Option[Send => Unit]) extends Response(request) {
+    info("===SendResponse===246==="+request.header.apiKey()); try { Integer.parseInt("SendResponse") } catch { case e:Exception => error("===", e)}
     override def responseString: Option[String] = responseAsString
-
     override def onComplete: Option[Send => Unit] = onCompleteCallback
 
-    override def toString: String =
-      s"Response(type=Send, request=$request, send=$responseSend, asString=$responseAsString)"
+    override def toString: String = s"Response(type=Send, request=$request, send=$responseSend, asString=$responseAsString)"
+
   }
 
   class NoOpResponse(request: Request) extends Response(request) {
@@ -309,9 +309,9 @@ class RequestChannel(val queueSize: Int) extends KafkaMetricsGroup {
   def sendRequest(request: RequestChannel.Request) {
     requestQueue.put(request)
   }
-
   /** Send a response back to the socket server to be sent over the network */
   def sendResponse(response: RequestChannel.Response) {
+    info("===sendResponse===314==="+response.request.header.apiKey()); try{ Integer.parseInt("sendResponse") } catch {case e:Exception => error("===", e)}
     if (isTraceEnabled) {
       val requestHeader = response.request.header
       val message = response match {

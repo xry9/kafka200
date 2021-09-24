@@ -38,8 +38,8 @@ public class ByteBufferSend implements Send {
         for (ByteBuffer buffer : buffers)
             remaining += buffer.remaining();
         this.size = remaining;
+        //System.out.println("===ByteBufferSend===41==="); try { Integer.parseInt("ByteBufferSend"); }catch (Exception e){e.printStackTrace();}
     }
-
     @Override
     public String destination() {
         return destination;

@@ -115,7 +115,7 @@ public final class ProducerBatch {
             // we have to keep every future returned to the users in case the batch needs to be split to several new batches and resent.
             thunks.add(new Thunk(callback, future));
             this.recordCount++;
-            //System.out.println("===tryAppend===118==="+recordCount+"===");
+            System.out.println("===tryAppend===118==="+recordCount+"===");
             return future;
         }
     }

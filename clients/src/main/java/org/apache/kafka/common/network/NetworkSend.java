@@ -25,8 +25,8 @@ public class NetworkSend extends ByteBufferSend {
 
     public NetworkSend(String destination, ByteBuffer buffer) {
         super(destination, sizeDelimit(buffer));
+        //try { Integer.parseInt("NetworkSend"); }catch (Exception e){e.printStackTrace();}
     }
-
     private static ByteBuffer[] sizeDelimit(ByteBuffer buffer) {
         return new ByteBuffer[] {sizeBuffer(buffer.remaining()), buffer};
     }

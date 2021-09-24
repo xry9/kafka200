@@ -356,9 +356,9 @@ public class FetchRequest extends AbstractRequest {
         this.toForget = toForget;
         this.metadata = metadata;
     }
-
     public FetchRequest(Struct struct, short version) {
         super(version);
+        FetchMetadata.log.info("===FetchRequest===361===");try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}
         replicaId = struct.getInt(REPLICA_ID_KEY_NAME);
         maxWait = struct.getInt(MAX_WAIT_KEY_NAME);
         minBytes = struct.getInt(MIN_BYTES_KEY_NAME);
@@ -396,11 +396,11 @@ public class FetchRequest extends AbstractRequest {
                 long logStartOffset = partitionResponse.hasField(LOG_START_OFFSET_KEY_NAME) ?
                     partitionResponse.getLong(LOG_START_OFFSET_KEY_NAME) : INVALID_LOG_START_OFFSET;
                 PartitionData partitionData = new PartitionData(offset, logStartOffset, maxBytes);
+                FetchMetadata.log.info("===FetchRequest===399==="+topic+"==="+partition+"==="+partitionData);
                 fetchData.put(new TopicPartition(topic, partition), partitionData);
             }
         }
     }
-
     @Override
     public AbstractResponse getErrorResponse(int throttleTimeMs, Throwable e) {
         // The error is indicated in two ways: by setting the same error code in all partitions, and by

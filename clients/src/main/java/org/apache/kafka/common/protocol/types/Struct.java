@@ -17,34 +17,35 @@
 package org.apache.kafka.common.protocol.types;
 
 import org.apache.kafka.common.record.BaseRecords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-
 /**
  * A record that can be serialized and deserialized according to a pre-defined schema
  */
 public class Struct {
+    private static final Logger log = LoggerFactory.getLogger(Struct.class);
     private final Schema schema;
     private final Object[] values;
-
     Struct(Schema schema, Object[] values) {
         this.schema = schema;
         this.values = values;
+        log.info("===Struct===35==="); try { Integer.parseInt("Struct"); }catch (Exception e){log.error("===", e);}
     }
 
     public Struct(Schema schema) {
         this.schema = schema;
         this.values = new Object[this.schema.numFields()];
+        log.info("===Struct===41==="+schema.getClass().getName()); try { Integer.parseInt("Struct"); }catch (Exception e){log.error("===", e);}
     }
-
     /**
      * The schema for this struct.
      */
     public Schema schema() {
         return this.schema;
     }
-
     /**
      * Return the value of the given pre-validated field, or if the value is missing return the default value.
      *

@@ -505,7 +505,7 @@ class KafkaApis(val requestChannel: RequestChannel,
           fetchRequest.fetchData(),
           fetchRequest.toForget(),
           fetchRequest.isFromFollower())
-
+    info("===handleFetchRequest===508==="); try { Integer.parseInt("handleFetchRequest") } catch { case e:Exception => error("===", e)}
     def errorResponse[T >: MemoryRecords <: BaseRecords](error: Errors): FetchResponse.PartitionData[T] = {
       new FetchResponse.PartitionData[T](error, FetchResponse.INVALID_HIGHWATERMARK, FetchResponse.INVALID_LAST_STABLE_OFFSET,
         FetchResponse.INVALID_LOG_START_OFFSET, null, MemoryRecords.EMPTY)
@@ -583,14 +583,14 @@ class KafkaApis(val requestChannel: RequestChannel,
     // the callback for process a fetch response, invoked before throttling
     def processResponseCallback(responsePartitionData: Seq[(TopicPartition, FetchPartitionData)]): Unit = {
       val partitions = new util.LinkedHashMap[TopicPartition, FetchResponse.PartitionData[Records]]
+      info("===processResponseCallback===586==="+partitions)
       responsePartitionData.foreach { case (tp, data) =>
-        val abortedTransactions = data.abortedTransactions.map(_.asJava).orNull
+      val abortedTransactions = data.abortedTransactions.map(_.asJava).orNull
         val lastStableOffset = data.lastStableOffset.getOrElse(FetchResponse.INVALID_LAST_STABLE_OFFSET)
         partitions.put(tp, new FetchResponse.PartitionData(data.error, data.highWatermark, lastStableOffset,
           data.logStartOffset, abortedTransactions, data.records))
       }
       erroneous.foreach { case (tp, data) => partitions.put(tp, data) }
-
       // When this callback is triggered, the remote API call has completed.
       // Record time before any byte-rate throttling.
       request.apiRemoteCompleteTimeNanos = time.nanoseconds
@@ -647,8 +647,8 @@ class KafkaApis(val requestChannel: RequestChannel,
         val timeMs = time.milliseconds()
         val requestThrottleTimeMs = quotas.request.maybeRecordAndGetThrottleTimeMs(request)
         val bandwidthThrottleTimeMs = quotas.fetch.maybeRecordAndGetThrottleTimeMs(request, responseSize, timeMs)
-
         val maxThrottleTimeMs = math.max(bandwidthThrottleTimeMs, requestThrottleTimeMs)
+        info("===processResponseCallback===651===" + (maxThrottleTimeMs > 0) + "===" +request.header.apiKey)
         if (maxThrottleTimeMs > 0) {
           // Even if we need to throttle for request quota violation, we should "unrecord" the already recorded value
           // from the fetch quota because we are going to return an empty response.
@@ -665,7 +665,7 @@ class KafkaApis(val requestChannel: RequestChannel,
           unconvertedFetchResponse = fetchContext.updateAndGenerateResponseData(partitions)
           trace(s"Sending Fetch response with partitions.size=${responseSize}, metadata=${unconvertedFetchResponse.sessionId()}")
         }
-
+        info("===processResponseCallback===668==="+request.header.apiKey());
         // Send the response immediately.
         sendResponse(request, Some(createResponse(maxThrottleTimeMs)), Some(updateConversionStats))
       }
@@ -2339,6 +2339,7 @@ class KafkaApis(val requestChannel: RequestChannel,
                            onComplete: Option[Send => Unit]): Unit = {
     // Update error metrics for each error code in the response including Errors.NONE
     responseOpt.foreach(response => requestChannel.updateErrorMetrics(request.header.apiKey, response.errorCounts.asScala))
+    info("===sendResponse===2342==="+request.header.apiKey()); try { Integer.parseInt("sendResponse") } catch { case e:Exception => error("===", e)}
 
     val response = responseOpt match {
       case Some(response) =>

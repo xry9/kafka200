@@ -634,7 +634,7 @@ class GroupMetadataManager(brokerId: Int,
           val offsets = emptyGroupOffsets.getOrElse(groupId, Map.empty[TopicPartition, CommitRecordMetadataAndOffset])
           val pendingOffsets = pendingEmptyGroupOffsets.getOrElse(groupId, Map.empty[Long, mutable.Map[TopicPartition, CommitRecordMetadataAndOffset]])
           debug(s"Loaded group metadata $group with offsets $offsets and pending offsets $pendingOffsets")
-          info("===doLoadGroupsAndOffsets===637==="+group+"==="+offsets)
+
           loadGroup(group, offsets, pendingOffsets)
           onGroupLoaded(group)
         }

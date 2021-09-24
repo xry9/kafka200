@@ -91,7 +91,7 @@ public class KafkaChannel {
     private ChannelState state;
     public KafkaChannel(String id, TransportLayer transportLayer, Authenticator authenticator, int maxReceiveSize, MemoryPool memoryPool) throws IOException {
         this.id = id;
-        //System.out.println("===KafkaChannel===94==="+transportLayer.getClass().getName());
+        System.out.println("===KafkaChannel===94==="+transportLayer.getClass().getName());
         this.transportLayer = transportLayer;
         this.authenticator = authenticator;
         this.networkThreadTimeNanos = 0L;
@@ -308,12 +308,12 @@ public class KafkaChannel {
     public Send write() throws IOException {
         Send result = null;
         if (send != null && send(send)) {
+            System.out.println("===write===311==="+send.getClass().getName());
             result = send;
             send = null;
         }
         return result;
     }
-
     /**
      * Accumulates network thread time for this channel.
      */

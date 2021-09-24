@@ -15,23 +15,23 @@
  * limitations under the License.
  */
 package org.apache.kafka.common.protocol.types;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
 /**
  * The schema for a compound record definition
  */
 public class Schema extends Type {
-
+    private static final Logger log = LoggerFactory.getLogger(Schema.class);
     private final BoundField[] fields;
     private final Map<String, BoundField> fieldsByName;
-
     /**
      * Construct the schema with a given list of its field values
-     *
      * @throws SchemaException If the given list have duplicate fields
      */
     public Schema(Field... fs) {
@@ -44,8 +44,8 @@ public class Schema extends Type {
             this.fields[i] = new BoundField(def, this, i);
             this.fieldsByName.put(def.name, this.fields[i]);
         }
+        log.info("===Schema===47==="+ Arrays.toString(fs)); //try { Integer.parseInt("Schema"); }catch (Exception e){log.error("===", e);}
     }
-
     /**
      * Write a struct to the buffer
      */
@@ -56,9 +56,9 @@ public class Schema extends Type {
             try {
                 Object value = field.def.type.validate(r.get(field));
                 field.def.type.write(buffer, value);
+                //log.info("===write===59==="+field.def.type.getClass().getName()+"==="+value);
             } catch (Exception e) {
-                throw new SchemaException("Error writing field '" + field.def.name + "': " +
-                                          (e.getMessage() == null ? e.getClass().getName() : e.getMessage()));
+                throw new SchemaException("Error writing field '" + field.def.name + "': " + (e.getMessage() == null ? e.getClass().getName() : e.getMessage()));
             }
         }
     }
@@ -72,9 +72,9 @@ public class Schema extends Type {
         for (int i = 0; i < fields.length; i++) {
             try {
                 objects[i] = fields[i].def.type.read(buffer);
+                //log.info("===read===75==="+fields[i].def.type.getClass().getName());
             } catch (Exception e) {
-                throw new SchemaException("Error reading field '" + fields[i].def.name + "': " +
-                                          (e.getMessage() == null ? e.getClass().getName() : e.getMessage()));
+                throw new SchemaException("Error reading field '" + fields[i].def.name + "': " + (e.getMessage() == null ? e.getClass().getName() : e.getMessage()));
             }
         }
         return new Struct(this, objects);

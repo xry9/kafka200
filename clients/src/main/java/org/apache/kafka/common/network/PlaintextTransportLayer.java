@@ -38,7 +38,7 @@ public class PlaintextTransportLayer implements TransportLayer {
     public PlaintextTransportLayer(SelectionKey key) throws IOException {
         this.key = key;
         this.socketChannel = (SocketChannel) key.channel();
-        //System.out.println("===PlaintextTransportLayer===41==="+this.socketChannel.getRemoteAddress()+"==="+this.socketChannel.getLocalAddress()+"==="+this.socketChannel.getClass().getName());//try { Integer.parseInt("PlaintextTransportLayer"); }catch (Exception e){e.printStackTrace();}
+        System.out.println("===PlaintextTransportLayer===41==="+this.socketChannel.getRemoteAddress()+"==="+this.socketChannel.getLocalAddress()+"==="+this.socketChannel.getClass().getName());//try { Integer.parseInt("PlaintextTransportLayer"); }catch (Exception e){e.printStackTrace();}
     }
     @Override
     public boolean ready() {
@@ -101,7 +101,7 @@ public class PlaintextTransportLayer implements TransportLayer {
     */
     @Override
     public int read(ByteBuffer dst) throws IOException {
-        System.out.println("===read===104==="); //try { Integer.parseInt("read"); }catch (Exception e){e.printStackTrace();}
+        //System.out.println("===read===104==="); //try { Integer.parseInt("read"); }catch (Exception e){e.printStackTrace();}
         return socketChannel.read(dst);
     }
     /**
@@ -150,7 +150,7 @@ public class PlaintextTransportLayer implements TransportLayer {
     */
     @Override
     public long write(ByteBuffer[] srcs) throws IOException {
-        System.out.println("===write===153===");
+        System.out.println("===write===153==="+socketChannel.getClass().getName()); //try { Integer.parseInt("write"); }catch (Exception e){e.printStackTrace();}
         return socketChannel.write(srcs);
     }
     /**

@@ -381,6 +381,7 @@ class Log(@volatile var dir: File,
     logger.info("===loadSegmentFiles===381==="+dir); try { Integer.parseInt("loadSegmentFiles") } catch {case e : Exception => error("===", e)}
     for (file <- dir.listFiles.sortBy(_.getName) if file.isFile) {
       if (isIndexFile(file)) {
+        logger.info("===loadSegmentFiles===384==="+file)
         // if it is an index file, make sure it has a corresponding .log file
         val offset = offsetFromFile(file)
         val logFile = Log.logFile(dir, offset)
@@ -392,12 +393,11 @@ class Log(@volatile var dir: File,
         // if it's a log file, load the corresponding log segment
         val baseOffset = offsetFromFile(file)
         val timeIndexFileNewlyCreated = !Log.timeIndexFile(dir, baseOffset).exists()
-        logger.info("===loadSegmentFiles===395==="+baseOffset+"==="+file)
-        val segment = LogSegment.open(dir = dir,
-          baseOffset = baseOffset,
-          config,
-          time = time,
-          fileAlreadyExists = true)
+        logger.info("===loadSegmentFiles===396==="+baseOffset+"==="+file)
+        val segment = LogSegment.open(dir = dir, baseOffset = baseOffset, config, time = time, fileAlreadyExists = true)
+
+
+
 
         try segment.sanityCheck(timeIndexFileNewlyCreated)
         catch {

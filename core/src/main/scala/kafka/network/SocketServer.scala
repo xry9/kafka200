@@ -669,11 +669,11 @@ private[kafka] class Processor(val id: Int,
     // removed from the Selector after discarding any pending staged receives.
     // `openOrClosingChannel` can be None if the selector closed the connection because it was idle for too long
     if (openOrClosingChannel(connectionId).isDefined) {
+      info("===sendResponse===672==="+response.request.header.apiKey()+"==="+responseSend)
       selector.send(responseSend)
       inflightResponses += (connectionId -> response)
     }
   }
-
   private def poll() {
     try selector.poll(300)
     catch {
@@ -685,16 +685,16 @@ private[kafka] class Processor(val id: Int,
   }
   private def processCompletedReceives() {
     selector.completedReceives.asScala.foreach { receive =>
-    logger.info("===processCompletedReceives===688===")
     try {
-        openOrClosingChannel(receive.source) match {
-          case Some(channel) =>
-            val header = RequestHeader.parse(receive.payload)
-            val connectionId = receive.source
-            val context = new RequestContext(header, connectionId, channel.socketAddress,
-              channel.principal, listenerName, securityProtocol)
-            val req = new RequestChannel.Request(processor = id, context = context,
-              startTimeNanos = time.nanoseconds, memoryPool, receive.payload, requestChannel.metrics)
+      openOrClosingChannel(receive.source) match {
+        case Some(channel) =>
+          val header = RequestHeader.parse(receive.payload)
+          val connectionId = receive.source
+          val context = new RequestContext(header, connectionId, channel.socketAddress, channel.principal, listenerName, securityProtocol)
+            logger.info("===processCompletedReceives===694==="+header.apiKey())
+
+            val req = new RequestChannel.Request(processor = id, context = context, startTimeNanos = time.nanoseconds, memoryPool, receive.payload, requestChannel.metrics)
+
             requestChannel.sendRequest(req)
             selector.mute(connectionId)
             handleChannelMuteEvent(connectionId, ChannelMuteEvent.REQUEST_RECEIVED)

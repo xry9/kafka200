@@ -211,8 +211,8 @@ public final class RecordAccumulator {
                 // Need to check if producer is closed again after grabbing the dequeue lock.
                 if (closed)
                     throw new KafkaException("Producer closed while send in progress");
-
                 RecordAppendResult appendResult = tryAppend(timestamp, key, value, headers, callback, dq);
+                System.out.println("===append===215==="+(appendResult != null));
                 if (appendResult != null) {
                     // Somebody else found us a batch, return the one we waited for! Hopefully this doesn't happen often...
                     return appendResult;
@@ -607,12 +607,12 @@ public final class RecordAccumulator {
             return d;
         d = new ArrayDeque<>();
         Deque<ProducerBatch> previous = this.batches.putIfAbsent(tp, d);
+        System.out.println("===getOrCreateDeque===610==="); //try { Integer.parseInt("getOrCreateDeque"); }catch (Exception e){e.printStackTrace();}
         if (previous == null)
             return d;
         else
             return previous;
     }
-
     /**
      * Deallocate the record batch
      */

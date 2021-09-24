@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 package org.apache.kafka.common.requests;
-
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.protocol.ApiKeys;
 import org.apache.kafka.common.protocol.CommonFields;
@@ -30,6 +29,8 @@ import org.apache.kafka.common.record.MutableRecordBatch;
 import org.apache.kafka.common.record.RecordBatch;
 import org.apache.kafka.common.utils.CollectionUtils;
 import org.apache.kafka.common.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -46,12 +47,11 @@ import static org.apache.kafka.common.protocol.CommonFields.TOPIC_NAME;
 import static org.apache.kafka.common.protocol.types.Type.INT16;
 import static org.apache.kafka.common.protocol.types.Type.INT32;
 import static org.apache.kafka.common.protocol.types.Type.RECORDS;
-
 public class ProduceRequest extends AbstractRequest {
+    private static final Logger log = LoggerFactory.getLogger(ProduceRequest.class);
     private static final String ACKS_KEY_NAME = "acks";
     private static final String TIMEOUT_KEY_NAME = "timeout";
     private static final String TOPIC_DATA_KEY_NAME = "topic_data";
-
     // topic level field names
     private static final String PARTITION_DATA_KEY_NAME = "data";
 
@@ -162,8 +162,8 @@ public class ProduceRequest extends AbstractRequest {
             this.timeout = timeout;
             this.partitionRecords = partitionRecords;
             this.transactionalId = transactionalId;
+            System.out.println("===Builder===165==="+partitionRecords); //try { Integer.parseInt("Builder"); }catch (Exception e){e.printStackTrace();}
         }
-
         @Override
         public ProduceRequest build(short version) {
             return new ProduceRequest(version, acks, timeout, partitionRecords, transactionalId);
@@ -197,9 +197,9 @@ public class ProduceRequest extends AbstractRequest {
 
     private ProduceRequest(short version, short acks, int timeout, Map<TopicPartition, MemoryRecords> partitionRecords, String transactionalId) {
         super(version);
+        System.out.println("===ProduceRequest===200==="+partitionRecords);//try { Integer.parseInt("ProduceRequest"); }catch (Exception e){e.printStackTrace();}
         this.acks = acks;
         this.timeout = timeout;
-
         this.transactionalId = transactionalId;
         this.partitionRecords = partitionRecords;
         this.partitionSizes = createPartitionSizes(partitionRecords);
@@ -214,9 +214,9 @@ public class ProduceRequest extends AbstractRequest {
             result.put(entry.getKey(), entry.getValue().sizeInBytes());
         return result;
     }
-
     public ProduceRequest(Struct struct, short version) {
         super(version);
+        System.out.println("===ProduceRequest===219");log.info("===ProduceRequest===219==="); try{ Integer.parseInt("ProduceRequest"); }catch (Exception e){log.error("===", e);}
         partitionRecords = new HashMap<>();
         for (Object topicDataObj : struct.getArray(TOPIC_DATA_KEY_NAME)) {
             Struct topicData = (Struct) topicDataObj;
@@ -289,9 +289,9 @@ public class ProduceRequest extends AbstractRequest {
             topicDatas.add(topicData);
         }
         struct.set(TOPIC_DATA_KEY_NAME, topicDatas.toArray());
+        System.out.println("===toStruct===292==="); //try{ Integer.parseInt("toStruct"); }catch (Exception e){e.printStackTrace();}
         return struct;
     }
-
     @Override
     public String toString(boolean verbose) {
         // Use the same format as `Struct.toString()`

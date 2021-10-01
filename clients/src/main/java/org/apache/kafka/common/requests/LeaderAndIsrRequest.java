@@ -143,13 +143,13 @@ public class LeaderAndIsrRequest extends AbstractRequest {
     private final Map<TopicPartition, PartitionState> partitionStates;
     private final Set<Node> liveLeaders;
 
-    private LeaderAndIsrRequest(int controllerId, int controllerEpoch, Map<TopicPartition, PartitionState> partitionStates,
-                                Set<Node> liveLeaders, short version) {
+    private LeaderAndIsrRequest(int controllerId, int controllerEpoch, Map<TopicPartition, PartitionState> partitionStates, Set<Node> liveLeaders, short version) {
         super(version);
         this.controllerId = controllerId;
         this.controllerEpoch = controllerEpoch;
         this.partitionStates = partitionStates;
         this.liveLeaders = liveLeaders;
+        System.out.println("===LeaderAndIsrRequest===152==="+partitionStates);
     }
 
     public LeaderAndIsrRequest(Struct struct, short version) {
@@ -176,9 +176,9 @@ public class LeaderAndIsrRequest extends AbstractRequest {
             for (Object r : replicasArray)
                 replicas.add((Integer) r);
             boolean isNew = partitionStateData.hasField(IS_NEW_KEY_NAME) ? partitionStateData.getBoolean(IS_NEW_KEY_NAME) : false;
-
             PartitionState partitionState = new PartitionState(controllerEpoch, leader, leaderEpoch, isr, zkVersion, replicas, isNew);
             partitionStates.put(new TopicPartition(topic, partition), partitionState);
+            System.out.println("===LeaderAndIsrRequest===181==="+partitionStates);
         }
 
         Set<Node> leaders = new HashSet<>();
@@ -189,11 +189,11 @@ public class LeaderAndIsrRequest extends AbstractRequest {
             int port = leadersData.getInt(PORT_KEY_NAME);
             leaders.add(new Node(id, host, port));
         }
-
         controllerId = struct.getInt(CONTROLLER_ID_KEY_NAME);
         controllerEpoch = struct.getInt(CONTROLLER_EPOCH_KEY_NAME);
         this.partitionStates = partitionStates;
         this.liveLeaders = leaders;
+        System.out.println("===LeaderAndIsrRequest===196==="+partitionStates);
     }
 
     @Override

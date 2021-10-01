@@ -703,7 +703,7 @@ public class Sender implements Runnable {
 
         String nodeId = Integer.toString(destination);
         ClientRequest clientRequest = client.newClientRequest(nodeId, requestBuilder, now, acks != 0, requestTimeoutMs, callback);
-        System.out.println("===sendProduceRequest===706==="+nodeId);
+        //System.out.println("===sendProduceRequest===706==="+nodeId);
         client.send(clientRequest, now);
         log.trace("Sent produce request to {}: {}", nodeId, requestBuilder);
     }

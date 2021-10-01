@@ -279,10 +279,10 @@ public class FetchRequest extends AbstractRequest {
             return new Builder(allowedVersion, allowedVersion, replicaId, maxWait, minBytes, fetchData);
         }
 
-        public Builder(short minVersion, short maxVersion, int replicaId, int maxWait, int minBytes,
-                        Map<TopicPartition, PartitionData> fetchData) {
+        public Builder(short minVersion, short maxVersion, int replicaId, int maxWait, int minBytes,                        Map<TopicPartition, PartitionData> fetchData) {
             super(ApiKeys.FETCH, minVersion, maxVersion);
             this.replicaId = replicaId;
+            FetchMetadata.log.info("===FetchRequest===285==="+replicaId);//try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}
             this.maxWait = maxWait;
             this.minBytes = minBytes;
             this.fetchData = fetchData;
@@ -343,10 +343,10 @@ public class FetchRequest extends AbstractRequest {
         }
     }
 
-    private FetchRequest(short version, int replicaId, int maxWait, int minBytes, int maxBytes,
-                         Map<TopicPartition, PartitionData> fetchData, IsolationLevel isolationLevel,
-                         List<TopicPartition> toForget, FetchMetadata metadata) {
+    private FetchRequest(short version, int replicaId, int maxWait, int minBytes, int maxBytes, Map<TopicPartition, PartitionData> fetchData, IsolationLevel isolationLevel, List<TopicPartition> toForget, FetchMetadata metadata) {
         super(version);
+                                        //fetchData.size()>0
+        FetchMetadata.log.info("===FetchRequest===349==="+replicaId+"==="+fetchData);if (true) {try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}}
         this.replicaId = replicaId;
         this.maxWait = maxWait;
         this.minBytes = minBytes;
@@ -358,8 +358,8 @@ public class FetchRequest extends AbstractRequest {
     }
     public FetchRequest(Struct struct, short version) {
         super(version);
-        FetchMetadata.log.info("===FetchRequest===361===");try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}
         replicaId = struct.getInt(REPLICA_ID_KEY_NAME);
+        FetchMetadata.log.info("===FetchRequest===362==="+replicaId);//try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}
         maxWait = struct.getInt(MAX_WAIT_KEY_NAME);
         minBytes = struct.getInt(MIN_BYTES_KEY_NAME);
         if (struct.hasField(MAX_BYTES_KEY_NAME))

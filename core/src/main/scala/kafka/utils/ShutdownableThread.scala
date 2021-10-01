@@ -21,8 +21,8 @@ import java.util.concurrent.{CountDownLatch, TimeUnit}
 
 import org.apache.kafka.common.internals.FatalExitError
 
-abstract class ShutdownableThread(val name: String, val isInterruptible: Boolean = true)
-        extends Thread(name) with Logging {
+abstract class ShutdownableThread(val name: String, val isInterruptible: Boolean = true) extends Thread(name) with Logging {
+  //info("===ShutdownableThread===25==="+name+"==="+this.getClass.getName); //try { Integer.parseInt("ShutdownableThread") } catch {case e:Exception => error("===", e)}
   this.setDaemon(false)
   this.logIdent = "[" + name + "]: "
   private val shutdownInitiated = new CountDownLatch(1)

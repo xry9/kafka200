@@ -52,6 +52,7 @@ public final class ClientRequest {
                          int requestTimeoutMs,
                          RequestCompletionHandler callback) {
         this.destination = destination;
+        System.out.println("===ClientRequest===55==="+destination+"==="+clientId); //try { Integer.parseInt("ClientRequest"); }catch (Exception e){e.printStackTrace();}
         this.requestBuilder = requestBuilder;
         this.correlationId = correlationId;
         this.clientId = clientId;
@@ -60,7 +61,6 @@ public final class ClientRequest {
         this.requestTimeoutMs = requestTimeoutMs;
         this.callback = callback;
     }
-
     @Override
     public String toString() {
         return "ClientRequest(expectResponse=" + expectResponse +

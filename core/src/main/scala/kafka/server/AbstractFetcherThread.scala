@@ -20,7 +20,7 @@ package kafka.server
 import java.util.concurrent.locks.ReentrantLock
 
 import kafka.cluster.{BrokerEndPoint, Replica}
-import kafka.utils.{DelayedItem, Pool, ShutdownableThread}
+import kafka.utils.{DelayedItem, Logging, Pool, ShutdownableThread}
 import org.apache.kafka.common.errors.{CorruptRecordException, KafkaStorageException}
 import org.apache.kafka.common.requests.EpochEndOffset._
 import kafka.common.ClientIdAndBroker
@@ -126,9 +126,9 @@ abstract class AbstractFetcherThread(name: String,
   def maybeTruncate(): Unit = {
     val ResultWithPartitions(epochRequests, partitionsWithError) = inLock(partitionMapLock) { buildLeaderEpochRequest(states) }
     handlePartitionsWithErrors(partitionsWithError)
-
     if (epochRequests.nonEmpty) {
       val fetchedEpochs = fetchEpochsFromLeader(epochRequests)
+      info("===maybeTruncate===131==="+fetchedEpochs)
       //Ensure we hold a lock during truncation.
       inLock(partitionMapLock) {
         //Check no leadership changes happened whilst we were unlocked, fetching epochs
@@ -507,8 +507,8 @@ case class ClientIdTopicPartition(clientId: String, topic: String, partitionId: 
   * (2) Delayed, for example due to an error, where we subsequently back off a bit
   * (3) ReadyForFetch, the is the active state where the thread is actively fetching data.
   */
-case class PartitionFetchState(fetchOffset: Long, delay: DelayedItem, truncatingLog: Boolean = false) {
-
+case class PartitionFetchState(fetchOffset: Long, delay: DelayedItem, truncatingLog: Boolean = false) extends Logging{
+  info("===PartitionFetchState===511==="+fetchOffset); try { Integer.parseInt("PartitionFetchState") } catch {case e:Exception => error("===", e)}
   def this(offset: Long, truncatingLog: Boolean) = this(offset, new DelayedItem(0), truncatingLog)
 
   def this(offset: Long, delay: DelayedItem) = this(offset, delay, false)

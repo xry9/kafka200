@@ -169,7 +169,7 @@ case class CommitRecordMetadataAndOffset(appendedBatchOffset: Option[Long], offs
 @nonthreadsafe
 private[group] class GroupMetadata(val groupId: String, initialState: GroupState) extends Logging {
   private[group] val lock = new ReentrantLock
-  info("===GroupMetadata===172==="+groupId+"==="+this.hashCode()); try { Integer.parseInt("GroupMetadata") }catch {case e:Exception => error("===", e)}
+  //info("===GroupMetadata===172==="+groupId+"==="+this.hashCode()); try { Integer.parseInt("GroupMetadata") }catch {case e:Exception => error("===", e)}
 
   private var state: GroupState = initialState
   var protocolType: Option[String] = None
@@ -311,7 +311,7 @@ private[group] class GroupMetadata(val groupId: String, initialState: GroupState
 
   def initializeOffsets(offsets: collection.Map[TopicPartition, CommitRecordMetadataAndOffset],
                         pendingTxnOffsets: Map[Long, mutable.Map[TopicPartition, CommitRecordMetadataAndOffset]]) {
-    info("===initializeOffsets===314==="+offsets)
+    //info("===initializeOffsets===314==="+offsets)
     this.offsets ++= offsets
     this.pendingTransactionalOffsetCommits ++= pendingTxnOffsets
   }

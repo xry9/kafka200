@@ -66,7 +66,7 @@ public class FileRecords extends AbstractRecords implements Closeable {
         this.end = end;
         this.isSlice = isSlice;
         this.size = new AtomicInteger();
-        log.info("===FileRecords===69==="+file);try{ Integer.parseInt("FileRecords"); }catch (Exception e){log.error("===", e);}
+        //log.info("===FileRecords===69==="+file);try{ Integer.parseInt("FileRecords"); }catch (Exception e){log.error("===", e);}
         if (isSlice) {
             // don't check the file size if this is just a slice view
             size.set(end - start);
@@ -138,7 +138,7 @@ public class FileRecords extends AbstractRecords implements Closeable {
         // handle integer overflow or if end is beyond the end of the file
         if (end < 0 || end >= start + sizeInBytes())
             end = start + sizeInBytes();
-        log.info("===slice===141==="+file);try { Integer.parseInt("slice"); }catch (Exception e){log.error("===", e);}
+        //log.info("===slice===141==="+file);try { Integer.parseInt("slice"); }catch (Exception e){log.error("===", e);}
         return new FileRecords(file, channel, this.start + position, end, true);
     }
 
@@ -148,7 +148,7 @@ public class FileRecords extends AbstractRecords implements Closeable {
      * @return the number of bytes written to the underlying file
      */
     public int append(MemoryRecords records) throws IOException {
-        log.info("===channel===151==="+records.sizeInBytes()+"==="+file);try { Integer.parseInt("channel"); }catch (Exception e){log.error("===", e);}
+        //log.info("===channel===151==="+records.sizeInBytes()+"==="+file);try { Integer.parseInt("channel"); }catch (Exception e){log.error("===", e);}
         int written = records.writeFullyTo(channel);
         size.getAndAdd(written);
         return written;
@@ -264,7 +264,7 @@ public class FileRecords extends AbstractRecords implements Closeable {
 
         long position = start + offset;
         int count = Math.min(length, oldSize);
-        log.info("===channel===267==="+position+"==="+length+"==="+file);try { Integer.parseInt("channel"); }catch (Exception e){log.error("===", e);}
+        //log.info("===channel===267==="+position+"==="+length+"==="+file);try { Integer.parseInt("channel"); }catch (Exception e){log.error("===", e);}
         final long bytesTransferred;
         if (destChannel instanceof TransportLayer) {
             TransportLayer tl = (TransportLayer) destChannel;
@@ -376,7 +376,7 @@ public class FileRecords extends AbstractRecords implements Closeable {
         return batchIterator(start);
     }
     private AbstractIterator<FileChannelRecordBatch> batchIterator(int start) {
-        log.info("===batchIterator===378==="+start);try { Integer.parseInt("batchIterator"); }catch (Exception e){log.error("===", e);}
+        //log.info("===batchIterator===378==="+start);try { Integer.parseInt("batchIterator"); }catch (Exception e){log.error("===", e);}
         final int end;
         if (isSlice)
             end = this.end;

@@ -30,7 +30,7 @@ public final class TopicPartition implements Serializable {
     public TopicPartition(String topic, int partition) {
         this.partition = partition;
         this.topic = topic;
-        log.info("===TopicPartition===33==="+topic+"==="+partition);
+        //log.info("===TopicPartition===33==="+topic+"==="+partition);
     }
     public int partition() {
         return partition;

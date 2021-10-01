@@ -24,17 +24,17 @@ import org.apache.kafka.common.TopicPartition
 
 object ReplicationUtils extends Logging {
 
-  def updateLeaderAndIsr(zkClient: KafkaZkClient, partition: TopicPartition, newLeaderAndIsr: LeaderAndIsr,
-                         controllerEpoch: Int): (Boolean, Int) = {
+  def updateLeaderAndIsr(zkClient: KafkaZkClient, partition: TopicPartition, newLeaderAndIsr: LeaderAndIsr, controllerEpoch: Int): (Boolean, Int) = {
     debug(s"Updated ISR for $partition to ${newLeaderAndIsr.isr.mkString(",")}")
     val path = TopicPartitionStateZNode.path(partition)
     val newLeaderData = TopicPartitionStateZNode.encode(LeaderIsrAndControllerEpoch(newLeaderAndIsr, controllerEpoch))
+    info("===updateLeaderAndIsr===31==="+partition+"==="+path+"==="+newLeaderAndIsr)
     // use the epoch of the controller that made the leadership decision, instead of the current controller epoch
-    val updatePersistentPath: (Boolean, Int) = zkClient.conditionalUpdatePath(path, newLeaderData,
-      newLeaderAndIsr.zkVersion, Some(checkLeaderAndIsrZkData))
+    val updatePersistentPath: (Boolean, Int) = zkClient.conditionalUpdatePath(path, newLeaderData, newLeaderAndIsr.zkVersion, Some(checkLeaderAndIsrZkData))
+
+    info("===updateLeaderAndIsr===35==="+updatePersistentPath+"==="+path+"==="+partition+"==="+newLeaderAndIsr); //try { Integer.parseInt("updateLeaderAndIsr") } catch { case e:Exception => error("===", e)}
     updatePersistentPath
   }
-
   private def checkLeaderAndIsrZkData(zkClient: KafkaZkClient, path: String, expectedLeaderAndIsrInfo: Array[Byte]): (Boolean, Int) = {
     try {
       val (writtenLeaderOpt, writtenStat) = zkClient.getDataAndStat(path)

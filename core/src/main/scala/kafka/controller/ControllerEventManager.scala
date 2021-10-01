@@ -27,13 +27,13 @@ import kafka.utils.ShutdownableThread
 import org.apache.kafka.common.utils.Time
 
 import scala.collection._
-
 object ControllerEventManager {
   val ControllerEventThreadName = "controller-event-thread"
+  //println("===ControllerEventManager===32==="); try { Integer.parseInt("ControllerEventManager") } catch {case e:Exception => e.printStackTrace()}
 }
 class ControllerEventManager(controllerId: Int, rateAndTimeMetrics: Map[ControllerState, KafkaTimer],
                              eventProcessedListener: ControllerEvent => Unit) extends KafkaMetricsGroup {
-
+  info("===ControllerEventManager===36==="); try { Integer.parseInt("ControllerEventManager") } catch {case e:Exception => error("===", e)}
   @volatile private var _state: ControllerState = ControllerState.Idle
   private val putLock = new ReentrantLock()
   private val queue = new LinkedBlockingQueue[ControllerEvent]
@@ -62,9 +62,9 @@ class ControllerEventManager(controllerId: Int, rateAndTimeMetrics: Map[Controll
   }
 
   def put(event: ControllerEvent): Unit = inLock(putLock) {
+    info("===queue===65==="+event); try { Integer.parseInt("queue") } catch { case e:Exception => error("===", e)}
     queue.put(event)
   }
-
   def clearAndPut(event: ControllerEvent): Unit = inLock(putLock) {
     queue.clear()
     put(event)
@@ -80,9 +80,9 @@ class ControllerEventManager(controllerId: Int, rateAndTimeMetrics: Map[Controll
           _state = controllerEvent.state
 
           eventQueueTimeHist.update(time.milliseconds() - controllerEvent.enqueueTimeMs)
-
           try {
             rateAndTimeMetrics(state).time {
+              info("===doWork===85==="+controllerEvent.getClass.getName)
               controllerEvent.process()
             }
           } catch {

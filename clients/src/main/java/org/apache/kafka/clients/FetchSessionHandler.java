@@ -102,8 +102,8 @@ public class FetchSessionHandler {
             this.toForget = toForget;
             this.sessionPartitions = sessionPartitions;
             this.metadata = metadata;
+            //FetchMetadata.log.info("===FetchRequestData===105===");//try { Integer.parseInt("FetchRequestData"); }catch (Exception e){FetchMetadata.log.error("===", e);}
         }
-
         /**
          * Get the set of partitions to send in this fetch request.
          */
@@ -192,12 +192,12 @@ public class FetchSessionHandler {
          */
         public void add(TopicPartition topicPartition, PartitionData data) {
             next.put(topicPartition, data);
+            //FetchMetadata.log.info("===add===195==="+topicPartition+"==="+data);//try { Integer.parseInt("add"); }catch (Exception e){FetchMetadata.log.error("===", e);}
         }
-
         public FetchRequestData build() {
+            //FetchMetadata.log.info("===build===197==="+(nextMetadata.isFull()));//try { Integer.parseInt("build"); }catch (Exception e){FetchMetadata.log.error("===", e);}
             if (nextMetadata.isFull()) {
-                log.debug("Built full fetch {} for node {} with {}.",
-                    nextMetadata, node, partitionsToLogString(next.keySet()));
+                log.debug("Built full fetch {} for node {} with {}.", nextMetadata, node, partitionsToLogString(next.keySet()));
                 sessionPartitions = next;
                 next = null;
                 Map<TopicPartition, PartitionData> toSend =
@@ -208,8 +208,7 @@ public class FetchSessionHandler {
             List<TopicPartition> added = new ArrayList<>();
             List<TopicPartition> removed = new ArrayList<>();
             List<TopicPartition> altered = new ArrayList<>();
-            for (Iterator<Entry<TopicPartition, PartitionData>> iter =
-                     sessionPartitions.entrySet().iterator(); iter.hasNext(); ) {
+            for (Iterator<Entry<TopicPartition, PartitionData>> iter = sessionPartitions.entrySet().iterator(); iter.hasNext(); ) {
                 Entry<TopicPartition, PartitionData> entry = iter.next();
                 TopicPartition topicPartition = entry.getKey();
                 PartitionData prevData = entry.getValue();
@@ -223,6 +222,7 @@ public class FetchSessionHandler {
                         // Move the altered partition to the end of 'next'
                         next.remove(topicPartition);
                         next.put(topicPartition, nextData);
+                        //FetchMetadata.log.info("===build===225==="+topicPartition+"==="+nextData);
                         entry.setValue(nextData);
                         altered.add(topicPartition);
                     }
@@ -242,10 +242,10 @@ public class FetchSessionHandler {
                 if (sessionPartitions.containsKey(topicPartition)) {
                     // In the previous loop, all the partitions which existed in both sessionPartitions
                     // and next were moved to the end of next, or removed from next.  Therefore,
-                    // once we hit one of them, we know there are no more unseen entries to look
-                    // at in next.
+                    // once we hit one of them, we know there are no more unseen entries to look at in next.
                     break;
                 }
+                //FetchMetadata.log.info("===build===248==="+topicPartition+"==="+nextData);
                 sessionPartitions.put(topicPartition, nextData);
                 added.add(topicPartition);
             }
@@ -255,9 +255,9 @@ public class FetchSessionHandler {
                     partitionsToLogString(sessionPartitions.keySet()));
             Map<TopicPartition, PartitionData> toSend =
                 Collections.unmodifiableMap(new LinkedHashMap<>(next));
-            Map<TopicPartition, PartitionData> curSessionPartitions =
-                Collections.unmodifiableMap(new LinkedHashMap<>(sessionPartitions));
+            Map<TopicPartition, PartitionData> curSessionPartitions = Collections.unmodifiableMap(new LinkedHashMap<>(sessionPartitions));
             next = null;
+            //FetchMetadata.log.info("===build===260==="+curSessionPartitions+"==="+sessionPartitions);
             return new FetchRequestData(toSend, Collections.unmodifiableList(removed),
                 curSessionPartitions, nextMetadata);
         }

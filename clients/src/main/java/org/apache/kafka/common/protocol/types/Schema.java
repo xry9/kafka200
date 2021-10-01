@@ -44,7 +44,7 @@ public class Schema extends Type {
             this.fields[i] = new BoundField(def, this, i);
             this.fieldsByName.put(def.name, this.fields[i]);
         }
-        log.info("===Schema===47==="+ Arrays.toString(fs)); //try { Integer.parseInt("Schema"); }catch (Exception e){log.error("===", e);}
+        //log.info("===Schema===47==="+ Arrays.toString(fs)); //try { Integer.parseInt("Schema"); }catch (Exception e){log.error("===", e);}
     }
     /**
      * Write a struct to the buffer

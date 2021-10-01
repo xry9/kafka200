@@ -271,7 +271,7 @@ public class MemoryRecordsBuilder {
      * possible to update the RecordBatch header.
      */
     public void closeForRecordAppends() {
-        System.out.println("===closeForRecordAppends===274===");//try { Integer.parseInt("closeForRecordAppends"); }catch (Exception e){e.printStackTrace();}
+        //System.out.println("===closeForRecordAppends===274===");//try { Integer.parseInt("closeForRecordAppends"); }catch (Exception e){e.printStackTrace();}
         if (appendStream != CLOSED_STREAM) {
             try {
                 appendStream.close();
@@ -411,7 +411,7 @@ public class MemoryRecordsBuilder {
 
             if (firstTimestamp == null)
                 firstTimestamp = timestamp;
-            System.out.println("===appendWithOffset===414==="+(magic > RecordBatch.MAGIC_VALUE_V1));
+            //System.out.println("===appendWithOffset===414==="+(magic > RecordBatch.MAGIC_VALUE_V1));
             if (magic > RecordBatch.MAGIC_VALUE_V1) {
                 appendDefaultRecord(offset, timestamp, key, value, headers);
                 return null;
@@ -761,7 +761,7 @@ public class MemoryRecordsBuilder {
     }
 
     private long nextSequentialOffset() {
-        System.out.println("===nextSequentialOffset===764==="+(lastOffset == null)+"==="+baseOffset);
+        //System.out.println("===nextSequentialOffset===764==="+(lastOffset == null)+"==="+baseOffset);
         return lastOffset == null ? baseOffset : lastOffset + 1;
     }
     public static class RecordsInfo {

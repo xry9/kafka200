@@ -145,7 +145,7 @@ class SocketServer(val config: KafkaConfig, val metrics: Metrics, val time: Time
     endpoints.foreach { endpoint =>
       val listenerName = endpoint.listenerName
       val securityProtocol = endpoint.securityProtocol
-      logger.info("===endpoints===148==="+endpoint.host+"==="+endpoint.port)
+      //logger.info("===endpoints===148==="+endpoint.host+"==="+endpoint.port)
       val acceptor = new Acceptor(endpoint, sendBufferSize, recvBufferSize, brokerId, connectionQuotas)
       addProcessors(acceptor, endpoint, processorsPerListener)
       KafkaThread.nonDaemon(s"kafka-socket-acceptor-$listenerName-$securityProtocol-${endpoint.port}", acceptor).start()
@@ -231,7 +231,7 @@ class SocketServer(val config: KafkaConfig, val metrics: Metrics, val time: Time
 
   /* `protected` for test usage */
   protected[network] def newProcessor(id: Int, connectionQuotas: ConnectionQuotas, listenerName: ListenerName, securityProtocol: SecurityProtocol, memoryPool: MemoryPool): Processor = {
-    logger.info("===newProcessor===234==="+id)
+    //logger.info("===newProcessor===234==="+id)
     new Processor(id,
       time,
       config.socketRequestMaxBytes,
@@ -436,7 +436,7 @@ private[kafka] class Acceptor(val endPoint: EndPoint,
     try {
       serverChannel.socket.bind(socketAddress)
       info("Awaiting socket connections on %s:%d.".format(socketAddress.getHostString, serverChannel.socket.getLocalPort))
-      info("===openServerSocket===439==="); try { Integer.parseInt("openServerSocket") }catch { case e: Exception =>error("===", e) }
+      //info("===openServerSocket===439==="); try { Integer.parseInt("openServerSocket") }catch { case e: Exception =>error("===", e) }
     } catch {
       case e: SocketException =>
         throw new KafkaException("Socket server failed to bind to %s:%d: %s.".format(socketAddress.getHostString, port, e.getMessage), e)
@@ -502,7 +502,7 @@ private[kafka] class Processor(val id: Int,
                                credentialProvider: CredentialProvider,
                                memoryPool: MemoryPool,
                                logContext: LogContext) extends AbstractServerThread(connectionQuotas) with KafkaMetricsGroup {
-  logger.info("===Processor===505===");try { Integer.parseInt("Processor"); }catch {case e: Throwable => logger.error("===", e);}
+  //logger.info("===Processor===505===");try { Integer.parseInt("Processor"); }catch {case e: Throwable => logger.error("===", e);}
   import Processor._
   private object ConnectionId {
     def fromString(s: String): Option[ConnectionId] = s.split("-") match {
@@ -575,7 +575,7 @@ private[kafka] class Processor(val id: Int,
     try {
       while (isRunning) {
         try {
-          logger.info("===run===578===")
+          //logger.info("===run===578===")
           // setup any new connections that have been queued up
           configureNewConnections()
           // register any new responses for writing
@@ -669,7 +669,7 @@ private[kafka] class Processor(val id: Int,
     // removed from the Selector after discarding any pending staged receives.
     // `openOrClosingChannel` can be None if the selector closed the connection because it was idle for too long
     if (openOrClosingChannel(connectionId).isDefined) {
-      info("===sendResponse===672==="+response.request.header.apiKey()+"==="+responseSend)
+      //info("===sendResponse===672==="+response.request.header.apiKey()+"==="+responseSend)
       selector.send(responseSend)
       inflightResponses += (connectionId -> response)
     }
@@ -691,7 +691,7 @@ private[kafka] class Processor(val id: Int,
           val header = RequestHeader.parse(receive.payload)
           val connectionId = receive.source
           val context = new RequestContext(header, connectionId, channel.socketAddress, channel.principal, listenerName, securityProtocol)
-            logger.info("===processCompletedReceives===694==="+header.apiKey())
+            //logger.info("===processCompletedReceives===694==="+header.apiKey())
 
             val req = new RequestChannel.Request(processor = id, context = context, startTimeNanos = time.nanoseconds, memoryPool, receive.payload, requestChannel.metrics)
 

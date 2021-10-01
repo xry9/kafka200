@@ -101,7 +101,7 @@ class KafkaApis(val requestChannel: RequestChannel,
     try {
       trace(s"Handling request:${request.requestDesc(true)} from connection ${request.context.connectionId};" +
         s"securityProtocol:${request.context.securityProtocol},principal:${request.context.principal}")
-      logger.info("===handle===104==="+request.header.apiKey)
+      logger.info("===handle===104==="+request.header.apiKey+"==="+request.header.clientId()+"==="+request.header)
       request.header.apiKey match {
         case ApiKeys.PRODUCE => handleProduceRequest(request)
         case ApiKeys.FETCH => handleFetchRequest(request)
@@ -180,8 +180,8 @@ class KafkaApis(val requestChannel: RequestChannel,
           txnCoordinator.handleTxnEmigration(partition.partitionId, partition.getLeaderEpoch)
       }
     }
-
     if (authorize(request.session, ClusterAction, Resource.ClusterResource)) {
+      info("===handleLeaderAndIsrRequest===184==="+leaderAndIsrRequest.partitionStates)
       val response = replicaManager.becomeLeaderOrFollower(correlationId, leaderAndIsrRequest, onLeadershipChange)
       sendResponseExemptThrottle(request, response)
     } else {
@@ -222,7 +222,7 @@ class KafkaApis(val requestChannel: RequestChannel,
   def handleUpdateMetadataRequest(request: RequestChannel.Request) {
     val correlationId = request.header.correlationId
     val updateMetadataRequest = request.body[UpdateMetadataRequest]
-
+    info("===handleUpdateMetadataRequest===225==="+(authorize(request.session, ClusterAction, Resource.ClusterResource))+"==="+request.header.clientId())
     if (authorize(request.session, ClusterAction, Resource.ClusterResource)) {
       val deletedPartitions = replicaManager.maybeUpdateMetadataCache(correlationId, updateMetadataRequest)
       if (deletedPartitions.nonEmpty)
@@ -381,9 +381,9 @@ class KafkaApis(val requestChannel: RequestChannel,
    * Handle a produce request
    */
   def handleProduceRequest(request: RequestChannel.Request) {
+    info("===handleProduceRequest===384==="+request)
     val produceRequest = request.body[ProduceRequest]
     val numBytesAppended = request.header.toStruct.sizeOf + request.sizeOfBodyInBytes
-
     if (produceRequest.isTransactional) {
       if (!authorize(request.session, Write, Resource(TransactionalId, produceRequest.transactionalId, LITERAL))) {
         sendErrorResponseMaybeThrottle(request, Errors.TRANSACTIONAL_ID_AUTHORIZATION_FAILED.exception)
@@ -505,7 +505,7 @@ class KafkaApis(val requestChannel: RequestChannel,
           fetchRequest.fetchData(),
           fetchRequest.toForget(),
           fetchRequest.isFromFollower())
-    info("===handleFetchRequest===508==="); try { Integer.parseInt("handleFetchRequest") } catch { case e:Exception => error("===", e)}
+    info("===handleFetchRequest===508==="+fetchContext.getClass.getName); //try { Integer.parseInt("handleFetchRequest") } catch { case e:Exception => error("===", e)}
     def errorResponse[T >: MemoryRecords <: BaseRecords](error: Errors): FetchResponse.PartitionData[T] = {
       new FetchResponse.PartitionData[T](error, FetchResponse.INVALID_HIGHWATERMARK, FetchResponse.INVALID_LAST_STABLE_OFFSET,
         FetchResponse.INVALID_LOG_START_OFFSET, null, MemoryRecords.EMPTY)
@@ -583,7 +583,7 @@ class KafkaApis(val requestChannel: RequestChannel,
     // the callback for process a fetch response, invoked before throttling
     def processResponseCallback(responsePartitionData: Seq[(TopicPartition, FetchPartitionData)]): Unit = {
       val partitions = new util.LinkedHashMap[TopicPartition, FetchResponse.PartitionData[Records]]
-      info("===processResponseCallback===586==="+partitions)
+      //info("===processResponseCallback===586==="+partitions)
       responsePartitionData.foreach { case (tp, data) =>
       val abortedTransactions = data.abortedTransactions.map(_.asJava).orNull
         val lastStableOffset = data.lastStableOffset.getOrElse(FetchResponse.INVALID_LAST_STABLE_OFFSET)
@@ -2339,7 +2339,7 @@ class KafkaApis(val requestChannel: RequestChannel,
                            onComplete: Option[Send => Unit]): Unit = {
     // Update error metrics for each error code in the response including Errors.NONE
     responseOpt.foreach(response => requestChannel.updateErrorMetrics(request.header.apiKey, response.errorCounts.asScala))
-    info("===sendResponse===2342==="+request.header.apiKey()); try { Integer.parseInt("sendResponse") } catch { case e:Exception => error("===", e)}
+    //info("===sendResponse===2342==="+request.header.apiKey()); try { Integer.parseInt("sendResponse") } catch { case e:Exception => error("===", e)}
 
     val response = responseOpt match {
       case Some(response) =>

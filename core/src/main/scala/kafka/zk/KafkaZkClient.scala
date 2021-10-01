@@ -28,7 +28,7 @@ import kafka.security.auth.SimpleAclAuthorizer.VersionedAcls
 import kafka.security.auth.{Acl, Resource, ResourceType}
 import kafka.server.ConfigType
 import kafka.utils.Logging
-import kafka.zookeeper._
+import kafka.zookeeper.{AsyncRequest, CreateRequest, CreateResponse, DeleteRequest, ExistsRequest, GetChildrenRequest, GetDataRequest, GetDataResponse, SetDataRequest, SetDataResponse, StateChangeHandler, ZNodeChangeHandler, ZNodeChildChangeHandler, ZooKeeperClient}
 import org.apache.kafka.common.{KafkaException, TopicPartition}
 import org.apache.kafka.common.resource.PatternType
 import org.apache.kafka.common.security.token.delegation.{DelegationToken, TokenInformation}
@@ -100,11 +100,11 @@ class KafkaZkClient private (zooKeeperClient: ZooKeeperClient, isSecure: Boolean
    */
   def getTopicPartitionStatesRaw(partitions: Seq[TopicPartition]): Seq[GetDataResponse] = {
     val getDataRequests = partitions.map { partition =>
+      //info("===getTopicPartitionStatesRaw===103==="+TopicPartitionStateZNode.path(partition)+"==="+partition); //try { Integer.parseInt("getTopicPartitionStatesRaw") } catch { case e:Exception => error("===", e)}
       GetDataRequest(TopicPartitionStateZNode.path(partition), ctx = Some(partition))
     }
     retryRequestsUntilConnected(getDataRequests)
   }
-
   /**
    * Sets topic partition states for the given partitions.
    * @param leaderIsrAndControllerEpochs the partition states of each partition whose state we wish to set.
@@ -114,11 +114,11 @@ class KafkaZkClient private (zooKeeperClient: ZooKeeperClient, isSecure: Boolean
     val setDataRequests = leaderIsrAndControllerEpochs.map { case (partition, leaderIsrAndControllerEpoch) =>
       val path = TopicPartitionStateZNode.path(partition)
       val data = TopicPartitionStateZNode.encode(leaderIsrAndControllerEpoch)
+      //info("===setTopicPartitionStatesRaw===117==="+path+"==="+leaderIsrAndControllerEpoch)
       SetDataRequest(path, data, leaderIsrAndControllerEpoch.leaderAndIsr.zkVersion, Some(partition))
     }
     retryRequestsUntilConnected(setDataRequests.toSeq)
   }
-
   /**
    * Creates topic partition state znodes for the given partitions.
    * @param leaderIsrAndControllerEpochs the partition states of each partition whose state we wish to set.
@@ -158,30 +158,31 @@ class KafkaZkClient private (zooKeeperClient: ZooKeeperClient, isSecure: Boolean
   }
 
   /**
-   * Update the partition states of multiple partitions in zookeeper.
-   * @param leaderAndIsrs The partition states to update.
-   * @param controllerEpoch The current controller epoch.
-   * @return UpdateLeaderAndIsrResult instance containing per partition results.
-   */
+    * Update the partition states of multiple partitions in zookeeper.
+    * @param leaderAndIsrs The partition states to update.
+    * @param controllerEpoch The current controller epoch.
+    * @return UpdateLeaderAndIsrResult instance containing per partition results.
+    */
   def updateLeaderAndIsr(leaderAndIsrs: Map[TopicPartition, LeaderAndIsr], controllerEpoch: Int): UpdateLeaderAndIsrResult = {
+    info("===updateLeaderAndIsr===167==="+leaderAndIsrs+"==="); //try { Integer.parseInt("updateLeaderAndIsr") } catch { case e:Exception => error("===", e)}
     val successfulUpdates = mutable.Map.empty[TopicPartition, LeaderAndIsr]
     val updatesToRetry = mutable.Buffer.empty[TopicPartition]
     val failed = mutable.Map.empty[TopicPartition, Exception]
     val leaderIsrAndControllerEpochs = leaderAndIsrs.map { case (partition, leaderAndIsr) =>
-      partition -> LeaderIsrAndControllerEpoch(leaderAndIsr, controllerEpoch)
+    partition -> LeaderIsrAndControllerEpoch(leaderAndIsr, controllerEpoch)
     }
     val setDataResponses = try {
       setTopicPartitionStatesRaw(leaderIsrAndControllerEpochs)
     } catch {
       case e: Exception =>
-        leaderAndIsrs.keys.foreach(partition => failed.put(partition, e))
+      leaderAndIsrs.keys.foreach(partition => failed.put(partition, e))
         return UpdateLeaderAndIsrResult(successfulUpdates.toMap, updatesToRetry, failed.toMap)
     }
     setDataResponses.foreach { setDataResponse =>
-      val partition = setDataResponse.ctx.get.asInstanceOf[TopicPartition]
+    val partition = setDataResponse.ctx.get.asInstanceOf[TopicPartition]
       setDataResponse.resultCode match {
         case Code.OK =>
-          val updatedLeaderAndIsr = leaderAndIsrs(partition).withZkVersion(setDataResponse.stat.getVersion)
+        val updatedLeaderAndIsr = leaderAndIsrs(partition).withZkVersion(setDataResponse.stat.getVersion)
           successfulUpdates.put(partition, updatedLeaderAndIsr)
         case Code.BADVERSION => updatesToRetry += partition
         case _ => failed.put(partition, setDataResponse.resultException.get)
@@ -189,7 +190,6 @@ class KafkaZkClient private (zooKeeperClient: ZooKeeperClient, isSecure: Boolean
     }
     UpdateLeaderAndIsrResult(successfulUpdates.toMap, updatesToRetry, failed.toMap)
   }
-
   /**
    * Get log configs that merge local configs with topic-level configs in zookeeper.
    * @param topics The topics to get log configs for.
@@ -898,13 +898,13 @@ class KafkaZkClient private (zooKeeperClient: ZooKeeperClient, isSecure: Boolean
   def getControllerId: Option[Int] = {
     val getDataRequest = GetDataRequest(ControllerZNode.path)
     val getDataResponse = retryRequestUntilConnected(getDataRequest)
+    info("===getControllerId===901==="+ControllerZNode.path+"==="+getDataResponse.resultCode+"==="+getDataResponse.data)
     getDataResponse.resultCode match {
       case Code.OK => ControllerZNode.decode(getDataResponse.data)
       case Code.NONODE => None
       case _ => throw getDataResponse.resultException.get
     }
   }
-
   /**
    * Deletes the controller znode.
    */

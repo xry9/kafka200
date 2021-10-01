@@ -32,13 +32,13 @@ public class Struct {
     Struct(Schema schema, Object[] values) {
         this.schema = schema;
         this.values = values;
-        log.info("===Struct===35==="); try { Integer.parseInt("Struct"); }catch (Exception e){log.error("===", e);}
+        //log.info("===Struct===35==="); try { Integer.parseInt("Struct"); }catch (Exception e){log.error("===", e);}
     }
 
     public Struct(Schema schema) {
         this.schema = schema;
         this.values = new Object[this.schema.numFields()];
-        log.info("===Struct===41==="+schema.getClass().getName()); try { Integer.parseInt("Struct"); }catch (Exception e){log.error("===", e);}
+        //log.info("===Struct===41==="+schema.getClass().getName()); try { Integer.parseInt("Struct"); }catch (Exception e){log.error("===", e);}
     }
     /**
      * The schema for this struct.

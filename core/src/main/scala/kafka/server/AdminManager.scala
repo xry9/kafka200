@@ -78,19 +78,19 @@ class AdminManager(val config: KafkaConfig,
 
     // 1. map over topics creating assignment and calling zookeeper
     val brokers = metadataCache.getAliveBrokers.map { b => kafka.admin.BrokerMetadata(b.id, b.rack) }
+    info("===createTopics===81==="+brokers+"==="+createInfo)
     val metadata = createInfo.map { case (topic, arguments) =>
-      try {
+    try {
         val configs = new Properties()
         arguments.configs.asScala.foreach { case (key, value) =>
+          info("===createTopics===86==="+key+"==="+value)
           configs.setProperty(key, value)
         }
         LogConfig.validate(configs)
-
         val assignments = {
           if ((arguments.numPartitions != NO_NUM_PARTITIONS || arguments.replicationFactor != NO_REPLICATION_FACTOR)
             && !arguments.replicasAssignments.isEmpty)
-            throw new InvalidRequestException("Both numPartitions or replicationFactor and replicasAssignments were set. " +
-              "Both cannot be used at the same time.")
+            throw new InvalidRequestException("Both numPartitions or replicationFactor and replicasAssignments were set. " + "Both cannot be used at the same time.")
           else if (!arguments.replicasAssignments.isEmpty) {
             // Note: we don't check that replicaAssignment contains unknown brokers - unlike in add-partitions case,
             // this follows the existing logic in TopicCommand

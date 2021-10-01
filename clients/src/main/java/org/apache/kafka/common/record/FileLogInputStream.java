@@ -60,7 +60,7 @@ public class FileLogInputStream implements LogInputStream<FileLogInputStream.Fil
     @Override
     public FileChannelRecordBatch nextBatch() throws IOException {
         FileChannel channel = fileRecords.channel();
-        log.info("===nextBatch===63==="+channel);try { Integer.parseInt("nextBatch"); }catch (Exception e){log.error("===", e);}
+        //log.info("===nextBatch===63==="+channel);try { Integer.parseInt("nextBatch"); }catch (Exception e){log.error("===", e);}
         if (position >= end - HEADER_SIZE_UP_TO_MAGIC)
             return null;
         logHeaderBuffer.rewind();

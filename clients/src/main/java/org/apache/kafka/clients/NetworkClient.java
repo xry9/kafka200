@@ -462,7 +462,7 @@ public class NetworkClient implements KafkaClient {
     private void doSend(ClientRequest clientRequest, boolean isInternalRequest, long now, AbstractRequest request) {
         String destination = clientRequest.destination();
         RequestHeader header = clientRequest.makeHeader(request.version());
-        System.out.println("===header===465==="+header.apiKey()+"==="+request.getClass().getName());
+        //System.out.println("===doSend===465==="+header.apiKey()+"==="+destination+"==="+header); //try { Integer.parseInt("doSend"); }catch (Exception e){e.printStackTrace();}
         if (log.isDebugEnabled()) {
             int latestClientVersion = clientRequest.apiKey().latestVersion();
             if (header.apiVersion() == latestClientVersion) {
@@ -482,7 +482,7 @@ public class NetworkClient implements KafkaClient {
                 send,
                 now);
         this.inFlightRequests.add(inFlightRequest);
-        System.out.println("===doSend===485===");//try { Integer.parseInt("doSend"); }catch (Exception e){e.printStackTrace();}
+        //System.out.println("===doSend===485===");//try { Integer.parseInt("doSend"); }catch (Exception e){e.printStackTrace();}
         selector.send(send);
     }
     /**

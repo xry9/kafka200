@@ -160,12 +160,12 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
       override def beforeInitializingSession(): Unit = {
         val expireEvent = new Expire
         eventManager.clearAndPut(expireEvent)
-
         // Block initialization of the new session until the expiration event is being handled,
         // which ensures that all pending events have been processed before creating the new session
         expireEvent.waitUntilProcessingStarted()
       }
     })
+    info("===startup===168===")
     eventManager.put(Startup)
     eventManager.start()
   }
@@ -376,9 +376,9 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
         s"${newBrokers.mkString(",")}. Signaling restart of topic deletion for these topics")
       topicDeletionManager.resumeDeletionForTopics(replicasForTopicsToBeDeleted.map(_.topic))
     }
+    info("===onBrokerStartup===379==="+newBrokers)
     registerBrokerModificationsHandler(newBrokers)
   }
-
   private def registerBrokerModificationsHandler(brokerIds: Iterable[Int]): Unit = {
     debug(s"Register BrokerModifications handler for $brokerIds")
     brokerIds.foreach { brokerId =>
@@ -561,7 +561,6 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
    * `partitionsBeingReassigned` must be populated with all partitions being reassigned before this method is invoked
    * as explained in the method documentation of `removePartitionFromReassignedPartitions` (which is invoked by this
    * method).
-   *
    * @throws IllegalStateException if a partition is not in `partitionsBeingReassigned`
    */
   private def maybeTriggerPartitionReassignment(topicPartitions: Set[TopicPartition]) {
@@ -569,6 +568,7 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
     topicPartitions.foreach { tp =>
       if (topicDeletionManager.isTopicQueuedUpForDeletion(tp.topic)) {
         error(s"Skipping reassignment of $tp since the topic is currently being deleted")
+//        info("===maybeTriggerPartitionReassignment===572==="+tp)
         partitionsToBeRemovedFromReassignment.add(tp)
       } else {
         val reassignedPartitionContext = controllerContext.partitionsBeingReassigned.get(tp).getOrElse {
@@ -580,8 +580,8 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
         val assignedReplicas = controllerContext.partitionReplicaAssignment(tp)
         if (assignedReplicas.nonEmpty) {
           if (assignedReplicas == newReplicas) {
-            info(s"Partition $tp to be reassigned is already assigned to replicas " +
-              s"${newReplicas.mkString(",")}. Ignoring request for partition reassignment.")
+            info(s"Partition $tp to be reassigned is already assigned to replicas " + s"${newReplicas.mkString(",")}. Ignoring request for partition reassignment.")
+//            info("===maybeTriggerPartitionReassignment===585==="+tp)
             partitionsToBeRemovedFromReassignment.add(tp)
           } else {
             try {
@@ -595,18 +595,20 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
               case e: Throwable =>
                 error(s"Error completing reassignment of partition $tp", e)
                 // remove the partition from the admin path to unblock the admin client
+//                info("===maybeTriggerPartitionReassignment===599==="+tp)
                 partitionsToBeRemovedFromReassignment.add(tp)
             }
           }
         } else {
             error(s"Ignoring request to reassign partition $tp that doesn't exist.")
-            partitionsToBeRemovedFromReassignment.add(tp)
+//          info("===maybeTriggerPartitionReassignment===605==="+tp)
+          partitionsToBeRemovedFromReassignment.add(tp)
         }
       }
     }
+//    info("===maybeTriggerPartitionReassignment===609==="+partitionsToBeRemovedFromReassignment)
     removePartitionsFromReassignedPartitions(partitionsToBeRemovedFromReassignment)
   }
-
   private def onPreferredReplicaElection(partitions: Set[TopicPartition], isTriggeredByAutoRebalance: Boolean = false) {
     info(s"Starting preferred replica leader election for partitions ${partitions.mkString(",")}")
     try {
@@ -617,7 +619,6 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
       removePartitionsFromPreferredReplicaElection(partitions, isTriggeredByAutoRebalance)
     }
   }
-
   private def incrementControllerEpoch(): Unit = {
     val newControllerEpoch = controllerContext.epoch + 1
     val setDataResponse = zkClient.setControllerEpochRaw(newControllerEpoch, controllerContext.epochZkVersion)
@@ -627,8 +628,7 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
         controllerContext.epoch = newControllerEpoch
       case Code.NONODE =>
         // if path doesn't exist, this is the first controller whose epoch should be 1
-        // the following call can still fail if another controller gets elected between checking if the path exists and
-        // trying to create the controller epoch path
+        // the following call can still fail if another controller gets elected between checking if the path exists and trying to create the controller epoch path
         val createResponse = zkClient.createControllerEpochRaw(KafkaController.InitialControllerEpoch)
         createResponse.resultCode match {
           case Code.OK =>
@@ -722,10 +722,10 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
   private def updateLeaderAndIsrCache(partitions: Seq[TopicPartition] = controllerContext.allPartitions.toSeq) {
     val leaderIsrAndControllerEpochs = zkClient.getTopicPartitionStates(partitions)
     leaderIsrAndControllerEpochs.foreach { case (partition, leaderIsrAndControllerEpoch) =>
-      controllerContext.partitionLeadershipInfo.put(partition, leaderIsrAndControllerEpoch)
+    info("===partitionLeadershipInfo===725==="+partition+"==="+leaderIsrAndControllerEpoch); try { Integer.parseInt("partitionLeadershipInfo") } catch { case e:Exception => error("===", e)}
+    controllerContext.partitionLeadershipInfo.put(partition, leaderIsrAndControllerEpoch)
     }
   }
-
   private def areReplicasInIsr(partition: TopicPartition, replicas: Seq[Int]): Boolean = {
     zkClient.getTopicPartitionStates(Seq(partition)).get(partition).exists { leaderIsrAndControllerEpoch =>
       replicas.forall(leaderIsrAndControllerEpoch.leaderAndIsr.isr.contains)
@@ -1145,9 +1145,9 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
 
     override def process(): Unit = {
       zkClient.registerZNodeChangeHandlerAndCheckExistence(controllerChangeHandler)
+      //info("===process===1148===")
       elect()
     }
-
   }
 
   private def updateMetrics(): Unit = {
@@ -1199,18 +1199,18 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
     activeControllerId = zkClient.getControllerId.getOrElse(-1)
     /*
      * We can get here during the initial startup and the handleDeleted ZK callback. Because of the potential race condition,
-     * it's possible that the controller has already been elected when we get here. This check will prevent the following
-     * createEphemeralPath method from getting into an infinite loop if this broker is already the controller.
+     * it's possible that the controller has already been elected when we get here. This check will prevent the following createEphemeralPath method from getting into an infinite loop if this broker is already the controller.
      */
+    info("===elect===1204==="+activeControllerId); //try { Integer.parseInt("elect") } catch { case e:Exception => error("===", e) }
     if (activeControllerId != -1) {
       debug(s"Broker $activeControllerId has been elected as the controller, so stopping the election process.")
       return
     }
-
     try {
       zkClient.checkedEphemeralCreate(ControllerZNode.path, ControllerZNode.encode(config.brokerId, timestamp))
       info(s"${config.brokerId} successfully elected as the controller")
       activeControllerId = config.brokerId
+      info("===elect===1213==="+ControllerZNode.path+"==="+config.brokerId)
       onControllerFailover()
     } catch {
       case _: NodeExistsException =>
@@ -1230,8 +1230,8 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
 
   case object BrokerChange extends ControllerEvent {
     override def state: ControllerState = ControllerState.BrokerChange
-
     override def process(): Unit = {
+      info("===process===1234==="+isActive); try { Integer.parseInt("process") } catch { case e:Exception => error("===", e)}
       if (!isActive) return
       val curBrokers = zkClient.getAllBrokersInCluster.toSet
       val curBrokerIds = curBrokers.map(_.id)
@@ -1500,7 +1500,6 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
 
   case object Reelect extends ControllerEvent {
     override def state = ControllerState.ControllerChange
-
     override def process(): Unit = {
       val wasActiveBeforeChange = isActive
       zkClient.registerZNodeChangeHandlerAndCheckExistence(controllerChangeHandler)
@@ -1508,6 +1507,7 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
       if (wasActiveBeforeChange && !isActive) {
         onControllerResignation()
       }
+      //info("===process===1510===")
       elect()
     }
   }
@@ -1641,8 +1641,8 @@ case class PartitionAndReplica(topicPartition: TopicPartition, replica: Int) {
     s"[Topic=$topic,Partition=$partition,Replica=$replica]"
   }
 }
-
-case class LeaderIsrAndControllerEpoch(leaderAndIsr: LeaderAndIsr, controllerEpoch: Int) {
+case class LeaderIsrAndControllerEpoch(leaderAndIsr: LeaderAndIsr, controllerEpoch: Int) extends Logging {
+  info("===LeaderIsrAndControllerEpoch===1645==="+leaderAndIsr); //try { Integer.parseInt("LeaderIsrAndControllerEpoch") } catch { case e:Exception => error("===", e)}
   override def toString: String = {
     val leaderAndIsrInfo = new StringBuilder
     leaderAndIsrInfo.append("(Leader:" + leaderAndIsr.leader)

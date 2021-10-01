@@ -67,7 +67,7 @@ class ReplicaFetcherThread(name: String,
   private val leaderEndpoint = leaderEndpointBlockingSend.getOrElse(
     new ReplicaFetcherBlockingSend(sourceBroker, brokerConfig, metrics, time, fetcherId,
       s"broker-$replicaId-fetcher-$fetcherId", logContext))
-
+  info("===ReplicaFetcherThread===70==="+leaderEndpointBlockingSend+"==="+leaderEndpoint)
   // Visible for testing
   private[server] val fetchRequestVersion: Short =
     if (brokerConfig.interBrokerProtocolVersion >= KAFKA_2_0_IV1) 8
@@ -283,8 +283,8 @@ class ReplicaFetcherThread(name: String,
       if (partitionFetchState.isReadyForFetch && !shouldFollowerThrottle(quota, topicPartition)) {
         try {
           val logStartOffset = replicaMgr.getReplicaOrException(topicPartition).logStartOffset
-          builder.add(topicPartition, new JFetchRequest.PartitionData(
-            partitionFetchState.fetchOffset, logStartOffset, fetchSize))
+          info("===buildFetchRequest===286==="+partitionMap.size+"==="+topicPartition+"==="+(if (partitionFetchState !=null) partitionFetchState.fetchOffset else "null")+"==="+logStartOffset+"==="+fetchSize)
+          builder.add(topicPartition, new JFetchRequest.PartitionData(partitionFetchState.fetchOffset, logStartOffset, fetchSize))
         } catch {
           case _: KafkaStorageException =>
             // The replica has already been marked offline due to log directory failure and the original failure should have already been logged.
@@ -293,15 +293,15 @@ class ReplicaFetcherThread(name: String,
         }
       }
     }
-
     val fetchData = builder.build()
     val requestBuilder = JFetchRequest.Builder.
       forReplica(fetchRequestVersion, replicaId, maxWait, minBytes, fetchData.toSend())
-        .setMaxBytes(maxBytes)
-        .toForget(fetchData.toForget)
+      .setMaxBytes(maxBytes)
+      .toForget(fetchData.toForget)
     if (fetchMetadataSupported) {
       requestBuilder.metadata(fetchData.metadata())
     }
+    info("===buildFetchRequest===304==="+fetchData)
     ResultWithPartitions(new FetchRequest(fetchData.sessionPartitions(), requestBuilder), partitionsWithError)
   }
 
@@ -325,11 +325,11 @@ class ReplicaFetcherThread(name: String,
           val offsetTruncationState = getOffsetTruncationState(tp, leaderEpochOffset, replica)
           if (offsetTruncationState.offset < replica.highWatermark.messageOffset)
             warn(s"Truncating $tp to offset ${offsetTruncationState.offset} below high watermark ${replica.highWatermark.messageOffset}")
-
           partition.truncateTo(offsetTruncationState.offset, isFuture = false)
           // mark the future replica for truncation only when we do last truncation
           if (offsetTruncationState.truncationCompleted)
             replicaMgr.replicaAlterLogDirsManager.markPartitionsForTruncation(brokerConfig.brokerId, tp, offsetTruncationState.offset)
+          info("===maybeTruncate===332==="+tp+"==="+offsetTruncationState)
           fetchOffsets.put(tp, offsetTruncationState)
         }
       } catch {
@@ -358,6 +358,7 @@ class ReplicaFetcherThread(name: String,
     var result: Map[TopicPartition, EpochEndOffset] = null
     if (shouldSendLeaderEpochRequest) {
       val partitionsAsJava = partitions.map { case (tp, epoch) => tp -> epoch.asInstanceOf[Integer] }.toMap.asJava
+      info("===fetchEpochsFromLeader===361==="+partitionsAsJava)
       val epochRequest = new OffsetsForLeaderEpochRequest.Builder(offsetForLeaderEpochRequestVersion, partitionsAsJava)
       try {
         val response = leaderEndpoint.sendRequest(epochRequest)
@@ -365,8 +366,7 @@ class ReplicaFetcherThread(name: String,
         debug(s"Receive leaderEpoch response $result")
       } catch {
         case t: Throwable =>
-          warn(s"Error when sending leader epoch request for $partitions", t)
-
+        warn(s"Error when sending leader epoch request for $partitions", t)
           // if we get any unexpected exception, mark all partitions with an error
           result = partitions.map { case (tp, _) =>
             tp -> new EpochEndOffset(Errors.forException(t), UNDEFINED_EPOCH, UNDEFINED_EPOCH_OFFSET)

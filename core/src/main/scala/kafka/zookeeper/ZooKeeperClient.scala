@@ -80,9 +80,9 @@ class ZooKeeperClient(connectString: String,
       state -> newMeter(name, eventType.toLowerCase(Locale.ROOT), TimeUnit.SECONDS)
     }
   }
-
   info(s"Initializing a new session to $connectString.")
   // Fail-fast if there's an error during construction (so don't call initialize, which retries forever)
+  info("===ZooKeeperClientWatcher===85===")
   @volatile private var zooKeeper = new ZooKeeper(connectString, sessionTimeoutMs, ZooKeeperClientWatcher)
 
   newGauge("SessionState", new Gauge[String] {
@@ -163,8 +163,8 @@ class ZooKeeperClient(connectString: String,
     def callback(response: AsyncResponse): Unit = processResponse(response.asInstanceOf[Req#Response])
 
     def responseMetadata(sendTimeMs: Long) = new ResponseMetadata(sendTimeMs, receivedTimeMs = time.hiResClockMs())
-
     val sendTimeMs = time.hiResClockMs()
+    info("===send===167==="+request); //try { Integer.parseInt("send") } catch { case e:Exception => error("===", e)}
     request match {
       case ExistsRequest(path, ctx) =>
         zooKeeper.exists(path, shouldWatch(request), new StatCallback {
@@ -183,20 +183,20 @@ class ZooKeeperClient(connectString: String,
               Option(children).map(_.asScala).getOrElse(Seq.empty), stat, responseMetadata(sendTimeMs)))
         }, ctx.orNull)
       case CreateRequest(path, data, acl, createMode, ctx) =>
+        info("===send===186==="+path); //try { Integer.parseInt("send") } catch { case e:Exception => error("===", e)}
         zooKeeper.create(path, data, acl.asJava, createMode, new StringCallback {
           override def processResult(rc: Int, path: String, ctx: Any, name: String): Unit =
-            callback(CreateResponse(Code.get(rc), path, Option(ctx), name, responseMetadata(sendTimeMs)))
-        }, ctx.orNull)
+            callback(CreateResponse(Code.get(rc), path, Option(ctx), name, responseMetadata(sendTimeMs)))}, ctx.orNull)
       case SetDataRequest(path, data, version, ctx) =>
+        info("===send===191==="+path); try { Integer.parseInt("send") } catch { case e:Exception => error("===", e)}
         zooKeeper.setData(path, data, version, new StatCallback {
           override def processResult(rc: Int, path: String, ctx: Any, stat: Stat): Unit =
-            callback(SetDataResponse(Code.get(rc), path, Option(ctx), stat, responseMetadata(sendTimeMs)))
-        }, ctx.orNull)
+            callback(SetDataResponse(Code.get(rc), path, Option(ctx), stat, responseMetadata(sendTimeMs)))}, ctx.orNull)
       case DeleteRequest(path, version, ctx) =>
+        info("===send===196==="+path); //try { Integer.parseInt("send") } catch { case e:Exception => error("===", e)}
         zooKeeper.delete(path, version, new VoidCallback {
           override def processResult(rc: Int, path: String, ctx: Any): Unit =
-            callback(DeleteResponse(Code.get(rc), path, Option(ctx), responseMetadata(sendTimeMs)))
-        }, ctx.orNull)
+            callback(DeleteResponse(Code.get(rc), path, Option(ctx), responseMetadata(sendTimeMs)))}, ctx.orNull)
       case GetAclRequest(path, ctx) =>
         zooKeeper.getACL(path, null, new ACLCallback {
           override def processResult(rc: Int, path: String, ctx: Any, acl: java.util.List[ACL], stat: Stat): Unit = {
@@ -240,29 +240,32 @@ class ZooKeeperClient(connectString: String,
     }
     info("Connected.")
   }
-
   // If this method is changed, the documentation for registerZNodeChangeHandler and/or registerZNodeChildChangeHandler
   // may need to be updated.
-  private def shouldWatch(request: AsyncRequest): Boolean = request match {
-    case _: GetChildrenRequest => zNodeChildChangeHandlers.contains(request.path)
-    case _: ExistsRequest | _: GetDataRequest => zNodeChangeHandlers.contains(request.path)
-    case _ => throw new IllegalArgumentException(s"Request $request is not watchable")
+  private def shouldWatch(request: AsyncRequest): Boolean = {
+    //info("===shouldWatch===246==="+request.path+"==="+request+"==="+zNodeChildChangeHandlers+"==="+zNodeChangeHandlers)
+    request match {
+      case _: GetChildrenRequest => {
+        info("===shouldWatch===249==="+zNodeChildChangeHandlers.contains(request.path)+"==="+request.path+"==="+request+"==="+zNodeChildChangeHandlers+"==="+zNodeChangeHandlers)
+        zNodeChildChangeHandlers.contains(request.path)
+      }
+      case _: ExistsRequest | _: GetDataRequest => {
+        info("===shouldWatch===253==="+zNodeChangeHandlers.contains(request.path)+"==="+request.path+"==="+request+"==="+zNodeChildChangeHandlers+"==="+zNodeChangeHandlers)
+        zNodeChangeHandlers.contains(request.path)
+      }
+      case _ => throw new IllegalArgumentException(s"Request $request is not watchable")
+    }
   }
-
   /**
    * Register the handler to ZooKeeperClient. This is just a local operation. This does not actually register a watcher.
-   *
-   * The watcher is only registered once the user calls handle(AsyncRequest) or handle(Seq[AsyncRequest])
-   * with either a GetDataRequest or ExistsRequest.
-   *
+   * The watcher is only registered once the user calls handle(AsyncRequest) or handle(Seq[AsyncRequest]) with either a GetDataRequest or ExistsRequest.
    * NOTE: zookeeper only allows registration to a nonexistent znode with ExistsRequest.
-   *
    * @param zNodeChangeHandler the handler to register
    */
   def registerZNodeChangeHandler(zNodeChangeHandler: ZNodeChangeHandler): Unit = {
+    info("===registerZNodeChangeHandler===266==="+zNodeChangeHandler.path+"==="+zNodeChangeHandler); try { Integer.parseInt("registerZNodeChangeHandler") } catch { case e:Exception => error("===", e) }
     zNodeChangeHandlers.put(zNodeChangeHandler.path, zNodeChangeHandler)
   }
-
   /**
    * Unregister the handler from ZooKeeperClient. This is just a local operation.
    * @param path the path of the handler to unregister
@@ -270,18 +273,15 @@ class ZooKeeperClient(connectString: String,
   def unregisterZNodeChangeHandler(path: String): Unit = {
     zNodeChangeHandlers.remove(path)
   }
-
   /**
    * Register the handler to ZooKeeperClient. This is just a local operation. This does not actually register a watcher.
-   *
    * The watcher is only registered once the user calls handle(AsyncRequest) or handle(Seq[AsyncRequest]) with a GetChildrenRequest.
-   *
    * @param zNodeChildChangeHandler the handler to register
    */
   def registerZNodeChildChangeHandler(zNodeChildChangeHandler: ZNodeChildChangeHandler): Unit = {
+    info("===registerZNodeChildChangeHandler===282==="+zNodeChildChangeHandler.path+"==="+zNodeChildChangeHandler); try { Integer.parseInt("registerZNodeChildChangeHandler") } catch { case e:Exception => error("===", e)}
     zNodeChildChangeHandlers.put(zNodeChildChangeHandler.path, zNodeChildChangeHandler)
   }
-
   /**
    * Unregister the handler from ZooKeeperClient. This is just a local operation.
    * @param path the path of the handler to unregister
@@ -334,7 +334,6 @@ class ZooKeeperClient(connectString: String,
     // Initialization callbacks are invoked outside of the lock to avoid deadlock potential since their completion
     // may require additional Zookeeper requests, which will block to acquire the initialization lock
     stateChangeHandlers.values.foreach(callBeforeInitializingSession _)
-
     inWriteLock(initializationLock) {
       if (!connectionState.isAlive) {
         zooKeeper.close()
@@ -343,6 +342,7 @@ class ZooKeeperClient(connectString: String,
         var connected = false
         while (!connected) {
           try {
+            info("===ZooKeeperClientWatcher===345===")
             zooKeeper = new ZooKeeper(connectString, sessionTimeoutMs, ZooKeeperClientWatcher)
             connected = true
           } catch {
@@ -390,7 +390,6 @@ class ZooKeeperClient(connectString: String,
       reinitialize()
     })
   }
-
   // package level visibility for testing only
   private[zookeeper] object ZooKeeperClientWatcher extends Watcher {
     override def process(event: WatchedEvent): Unit = {
@@ -409,6 +408,7 @@ class ZooKeeperClient(connectString: String,
             scheduleSessionExpiryHandler()
           }
         case Some(path) =>
+          info("===process===411==="+event.getPath+"==="+event.getType)
           (event.getType: @unchecked) match {
             case EventType.NodeChildrenChanged => zNodeChildChangeHandlers.get(path).foreach(_.handleChildChange())
             case EventType.NodeCreated => zNodeChangeHandlers.get(path).foreach(_.handleCreation())
@@ -449,8 +449,8 @@ sealed trait AsyncRequest {
   def ctx: Option[Any]
 }
 
-case class CreateRequest(path: String, data: Array[Byte], acl: Seq[ACL], createMode: CreateMode,
-                         ctx: Option[Any] = None) extends AsyncRequest {
+case class CreateRequest(path: String, data: Array[Byte], acl: Seq[ACL], createMode: CreateMode, ctx: Option[Any] = None) extends AsyncRequest with Logging {
+  info("===CreateRequest===453==="+path); //try { Integer.parseInt("CreateRequest") } catch { case e:Exception => error("===", e)}
   type Response = CreateResponse
 }
 
@@ -466,10 +466,10 @@ case class GetDataRequest(path: String, ctx: Option[Any] = None) extends AsyncRe
   type Response = GetDataResponse
 }
 
-case class SetDataRequest(path: String, data: Array[Byte], version: Int, ctx: Option[Any] = None) extends AsyncRequest {
+case class SetDataRequest(path: String, data: Array[Byte], version: Int, ctx: Option[Any] = None) extends AsyncRequest with Logging {
+  //info("===SetDataRequest===470==="+path); //try { Integer.parseInt("SetDataRequest") } catch { case e:Exception => error("===", e)}
   type Response = SetDataResponse
 }
-
 case class GetAclRequest(path: String, ctx: Option[Any] = None) extends AsyncRequest {
   type Response = GetAclResponse
 }

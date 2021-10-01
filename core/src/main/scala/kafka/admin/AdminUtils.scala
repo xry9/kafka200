@@ -137,14 +137,14 @@ object AdminUtils extends Logging with AdminUtilities {
       throw new InvalidReplicationFactorException("Replication factor must be larger than 0.")
     if (replicationFactor > brokerMetadatas.size)
       throw new InvalidReplicationFactorException(s"Replication factor: $replicationFactor larger than available brokers: ${brokerMetadatas.size}.")
-    if (brokerMetadatas.forall(_.rack.isEmpty))
-      assignReplicasToBrokersRackUnaware(nPartitions, replicationFactor, brokerMetadatas.map(_.id), fixedStartIndex,
-        startPartitionId)
-    else {
-      if (brokerMetadatas.exists(_.rack.isEmpty))
-        throw new AdminOperationException("Not all brokers have rack information for replica rack aware assignment.")
-      assignReplicasToBrokersRackAware(nPartitions, replicationFactor, brokerMetadatas, fixedStartIndex,
-        startPartitionId)
+    if (brokerMetadatas.forall(_.rack.isEmpty)){
+      info("===assignReplicasToBrokers===141==="+nPartitions+"==="+replicationFactor)
+      assignReplicasToBrokersRackUnaware(nPartitions, replicationFactor, brokerMetadatas.map(_.id), fixedStartIndex, startPartitionId)
+    } else {
+      if (brokerMetadatas.exists(_.rack.isEmpty)) throw new AdminOperationException("Not all brokers have rack information for replica rack aware assignment.")
+      info("===assignReplicasToBrokers===145==="+nPartitions+"==="+replicationFactor)
+      assignReplicasToBrokersRackAware(nPartitions, replicationFactor, brokerMetadatas, fixedStartIndex, startPartitionId)
+
     }
   }
 
@@ -168,9 +168,9 @@ object AdminUtils extends Logging with AdminUtilities {
       ret.put(currentPartitionId, replicaBuffer)
       currentPartitionId += 1
     }
+    info("===assignReplicasToBrokersRackUnaware===171==="+ret)
     ret
   }
-
   private def assignReplicasToBrokersRackAware(nPartitions: Int,
                                                replicationFactor: Int,
                                                brokerMetadatas: Seq[BrokerMetadata],
@@ -217,9 +217,9 @@ object AdminUtils extends Logging with AdminUtilities {
       ret.put(currentPartitionId, replicaBuffer)
       currentPartitionId += 1
     }
+    info("===assignReplicasToBrokersRackAware===220==="+ret)
     ret
   }
-
   /**
     * Given broker and rack information, returns a list of brokers alternated by the rack. Assume
     * this is the rack and its brokers:

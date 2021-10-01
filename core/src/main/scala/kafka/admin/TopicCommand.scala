@@ -244,7 +244,7 @@ object TopicCommand extends Logging {
                 print("\tPartition: " + partitionId)
                 print("\tLeader: " + (if(leader.isDefined) leader.get else "none"))
                 print("\tReplicas: " + assignedReplicas.mkString(","))
-                print("\tIsr: " + inSyncReplicas.mkString(","))
+                print("\tIsr===: " + inSyncReplicas.mkString(","))
                 print(markedForDeletionString)
                 println()
               }

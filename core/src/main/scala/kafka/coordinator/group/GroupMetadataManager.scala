@@ -510,7 +510,7 @@ class GroupMetadataManager(brokerId: Int,
 
   private def doLoadGroupsAndOffsets(topicPartition: TopicPartition, onGroupLoaded: GroupMetadata => Unit) {
     def highWaterMark = replicaManager.getLogEndOffset(topicPartition).getOrElse(-1L)
-    info("===doLoadGroupsAndOffsets===513==="+topicPartition)
+    //info("===doLoadGroupsAndOffsets===513==="+topicPartition)
     replicaManager.getLog(topicPartition) match {
       case None =>
         warn(s"Attempted to load offsets and group metadata from $topicPartition, but found no log")
@@ -535,7 +535,7 @@ class GroupMetadataManager(brokerId: Int,
               fileRecords.readInto(buffer, 0)
               MemoryRecords.readableRecords(buffer)
           }
-          info("===doLoadGroupsAndOffsets===538==="+fetchDataInfo+"==="+currOffset)
+          //info("===doLoadGroupsAndOffsets===538==="+fetchDataInfo+"==="+currOffset)
           memRecords.batches.asScala.foreach { batch =>
             val isTxnOffsetCommit = batch.isTransactional
             if (batch.isControlBatch) {
@@ -556,7 +556,7 @@ class GroupMetadataManager(brokerId: Int,
                 require(record.hasKey, "Group metadata/offset entry key should not be null")
                 if (batchBaseOffset.isEmpty)
                   batchBaseOffset = Some(record.offset)
-                info("===doLoadGroupsAndOffsets===559==="+record.key)
+                //info("===doLoadGroupsAndOffsets===559==="+record.key)
                 GroupMetadataManager.readMessageKey(record.key) match {
                   case offsetKey: OffsetKey =>
                     if (isTxnOffsetCommit && !pendingOffsets.contains(batch.producerId))
@@ -580,7 +580,7 @@ class GroupMetadataManager(brokerId: Int,
                     // load group metadata
                     val groupId = groupMetadataKey.key
                     val groupMetadata = GroupMetadataManager.readGroupMessageValue(groupId, record.value)
-                    info("===doLoadGroupsAndOffsets===583==="+loadedGroups.size+"==="+topicPartition+"==="+groupId+"==="+groupMetadata)//+"==="+groupMetadata.allMembers
+                    //info("===doLoadGroupsAndOffsets===583==="+loadedGroups.size+"==="+topicPartition+"==="+groupId+"==="+groupMetadata)//+"==="+groupMetadata.allMembers
                     if (groupMetadata != null) {
                       removedGroups.remove(groupId)
                       loadedGroups.put(groupId, groupMetadata)
@@ -623,7 +623,7 @@ class GroupMetadataManager(brokerId: Int,
           val offsets = groupOffsets.getOrElse(group.groupId, Map.empty[TopicPartition, CommitRecordMetadataAndOffset])
           val pendingOffsets = pendingGroupOffsets.getOrElse(group.groupId, Map.empty[Long, mutable.Map[TopicPartition, CommitRecordMetadataAndOffset]])
           debug(s"Loaded group metadata $group with offsets $offsets and pending offsets $pendingOffsets")
-          info("===doLoadGroupsAndOffsets===626==="+group+"==="+offsets)
+          //info("===doLoadGroupsAndOffsets===626==="+group+"==="+offsets)
           loadGroup(group, offsets, pendingOffsets)
           onGroupLoaded(group)
         }
@@ -652,7 +652,7 @@ class GroupMetadataManager(brokerId: Int,
   private def loadGroup(group: GroupMetadata, offsets: Map[TopicPartition, CommitRecordMetadataAndOffset],
                         pendingTransactionalOffsets: Map[Long, mutable.Map[TopicPartition, CommitRecordMetadataAndOffset]]): Unit = {
     // offsets are initialized prior to loading the group into the cache to ensure that clients see a consistent view of the group's offsets
-    info("===loadGroup===655==="+offsets)
+    //info("===loadGroup===655==="+offsets)
     val loadedOffsets = offsets.mapValues {
       case CommitRecordMetadataAndOffset(commitRecordOffset, offsetAndMetadata) =>
       // special handling for version 0: set the expiration time stamp as commit time stamp + server default retention time

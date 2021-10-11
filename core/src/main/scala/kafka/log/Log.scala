@@ -238,7 +238,7 @@ class Log(@volatile var dir: File,
 
     /* Calculate the offset of the next message */
     nextOffsetMetadata = new LogOffsetMetadata(nextOffset, activeSegment.baseOffset, activeSegment.size)
-
+    //info("===nextOffsetMetadata===241==="+nextOffsetMetadata)
     _leaderEpochCache.clearAndFlushLatest(nextOffsetMetadata.messageOffset)
 
     logStartOffset = math.max(logStartOffset, segments.firstEntry.getValue.baseOffset)
@@ -521,8 +521,8 @@ class Log(@volatile var dir: File,
 
   private def updateLogEndOffset(messageOffset: Long) {
     nextOffsetMetadata = new LogOffsetMetadata(messageOffset, activeSegment.baseOffset, activeSegment.size)
+    //info("===nextOffsetMetadata===524==="+nextOffsetMetadata); try { Integer.parseInt("nextOffsetMetadata") } catch {case e:Exception => error("===", e)}
   }
-
   /**
    * Recover the log segments and return the next offset after recovery.
    * This method does not need to convert IOException to KafkaStorageException because it is only called before all
@@ -883,7 +883,7 @@ class Log(@volatile var dir: File,
         // always update the last producer id map offset so that the snapshot reflects the current offset
         // even if there isn't any idempotent data being written
         producerStateManager.updateMapEndOffset(appendInfo.lastOffset + 1)
-
+        //info("===append===886==="+appendInfo.lastOffset+"==="+dir)
         // increment the log end offset
         updateLogEndOffset(appendInfo.lastOffset + 1)
 
@@ -1031,8 +1031,8 @@ class Log(@volatile var dir: File,
       if (batchSize > config.maxMessageSize) {
         brokerTopicStats.topicStats(topicPartition.topic).bytesRejectedRate.mark(records.sizeInBytes)
         brokerTopicStats.allTopicsStats.bytesRejectedRate.mark(records.sizeInBytes)
-        throw new RecordTooLargeException(s"The record batch size in the append to $topicPartition is $batchSize bytes " +
-          s"which exceeds the maximum configured value of ${config.maxMessageSize}.")
+        throw new RecordTooLargeException(s"The record batch size in the append to $topicPartition is $batchSize bytes " + s"which exceeds the maximum configured value of ${config.maxMessageSize}.")
+
       }
 
       // check the validity of the message by checking CRC
@@ -1157,6 +1157,7 @@ class Log(@volatile var dir: File,
           }
         }
         val fetchInfo = segment.read(startOffset, maxOffset, maxLength, maxPosition, minOneMessage)
+        //info("===read===1160==="+(fetchInfo == null))
         if (fetchInfo == null) {
           segmentEntry = segments.higherEntry(segmentEntry.getKey)
         } else {
@@ -1166,7 +1167,6 @@ class Log(@volatile var dir: File,
           }
         }
       }
-
       // okay we are beyond the end of the last segment with no data fetched although the start offset is in range,
       // this can happen when all messages with offset larger than start offsets have been deleted.
       // In this case, we will return the empty set with log end offset metadata

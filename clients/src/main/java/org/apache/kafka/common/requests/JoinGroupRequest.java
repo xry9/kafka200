@@ -138,8 +138,8 @@ public class JoinGroupRequest extends AbstractRequest {
                 // v0 had no rebalance timeout but used session timeout implicitly
                 rebalanceTimeout = sessionTimeout;
             }
-            return new JoinGroupRequest(version, groupId, sessionTimeout,
-                    rebalanceTimeout, memberId, protocolType, groupProtocols);
+            //System.out.println("===build===141==="+groupId+"==="+groupId+"==="+memberId+"==="+protocolType+"==="+groupProtocols);
+            return new JoinGroupRequest(version, groupId, sessionTimeout, rebalanceTimeout, memberId, protocolType, groupProtocols);
         }
 
         @Override
@@ -167,11 +167,11 @@ public class JoinGroupRequest extends AbstractRequest {
         this.memberId = memberId;
         this.protocolType = protocolType;
         this.groupProtocols = groupProtocols;
+        //System.out.println("===JoinGroupRequest===170===");try { Integer.parseInt("JoinGroupRequest"); }catch (Exception e){e.printStackTrace();}
     }
-
     public JoinGroupRequest(Struct struct, short versionId) {
         super(versionId);
-
+        //System.out.println("===JoinGroupRequest===174===");try { Integer.parseInt("JoinGroupRequest"); }catch (Exception e){e.printStackTrace();}
         groupId = struct.get(GROUP_ID);
         sessionTimeout = struct.getInt(SESSION_TIMEOUT_KEY_NAME);
 

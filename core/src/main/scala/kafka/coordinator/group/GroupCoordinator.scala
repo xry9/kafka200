@@ -108,11 +108,11 @@ class GroupCoordinator(val brokerId: Int,
                       protocolType: String,
                       protocols: List[(String, Array[Byte])],
                       responseCallback: JoinCallback): Unit = {
+    //info("===handleJoinGroup===111==="+groupId+"==="+memberId)
     validateGroupStatus(groupId, ApiKeys.JOIN_GROUP).foreach { error =>
-      responseCallback(joinError(memberId, error))
+    responseCallback(joinError(memberId, error))
       return
     }
-
     if (sessionTimeoutMs < groupConfig.groupMinSessionTimeoutMs ||
       sessionTimeoutMs > groupConfig.groupMaxSessionTimeoutMs) {
       responseCallback(joinError(memberId, Errors.INVALID_SESSION_TIMEOUT))
@@ -128,8 +128,8 @@ class GroupCoordinator(val brokerId: Int,
             val group = groupManager.addGroup(new GroupMetadata(groupId, initialState = Empty))
             doJoinGroup(group, memberId, clientId, clientHost, rebalanceTimeoutMs, sessionTimeoutMs, protocolType, protocols, responseCallback)
           }
-
         case Some(group) =>
+          //info("===handleJoinGroup===132==="+groupId+"==="+group)
           doJoinGroup(group, memberId, clientId, clientHost, rebalanceTimeoutMs, sessionTimeoutMs, protocolType, protocols, responseCallback)
       }
     }
@@ -156,12 +156,12 @@ class GroupCoordinator(val brokerId: Int,
         // it reset its member id and retry
         responseCallback(joinError(memberId, Errors.UNKNOWN_MEMBER_ID))
       } else {
+        //info("===doJoinGroup===159==="+group.currentState)
         group.currentState match {
           case Dead =>
             // if the group is marked as dead, it means some other thread has just removed the group
             // from the coordinator metadata; this is likely that the group has migrated to some other
-            // coordinator OR the group is in a transient unstable phase. Let the member retry
-            // joining without the specified member id,
+            // coordinator OR the group is in a transient unstable phase. Let the member retry joining without the specified member id,
             responseCallback(joinError(memberId, Errors.UNKNOWN_MEMBER_ID))
           case PreparingRebalance =>
             if (memberId == JoinGroupRequest.UNKNOWN_MEMBER_ID) {
@@ -265,10 +265,10 @@ class GroupCoordinator(val brokerId: Int,
       } else if (generationId != group.generationId) {
         responseCallback(Array.empty, Errors.ILLEGAL_GENERATION)
       } else {
+        //info("===doSyncGroup====268==="+group.currentState)
         group.currentState match {
           case Empty | Dead =>
-            responseCallback(Array.empty, Errors.UNKNOWN_MEMBER_ID)
-
+          responseCallback(Array.empty, Errors.UNKNOWN_MEMBER_ID)
           case PreparingRebalance =>
             responseCallback(Array.empty, Errors.REBALANCE_IN_PROGRESS)
 
@@ -282,7 +282,7 @@ class GroupCoordinator(val brokerId: Int,
               // fill any missing members with an empty assignment
               val missing = group.allMembers -- groupAssignment.keySet
               val assignment = groupAssignment ++ missing.map(_ -> Array.empty[Byte]).toMap
-
+              info("===doSyncGroup===285==="+group+"==="+assignment+"==="+group.allMembers)
               groupManager.storeGroup(group, assignment, (error: Errors) => {
                 group.inLock {
                   // another member may have joined the group while we were awaiting this callback,
@@ -626,8 +626,8 @@ class GroupCoordinator(val brokerId: Int,
       group.allMemberMetadata.foreach(completeAndScheduleNextHeartbeatExpiration(group, _))
     }
   }
-
   def handleGroupImmigration(offsetTopicPartitionId: Int) {
+    //info("===handleGroupImmigration===630==="+offsetTopicPartitionId)
     groupManager.scheduleLoadGroupAndOffsets(offsetTopicPartitionId, onGroupLoaded)
   }
 
@@ -678,16 +678,16 @@ class GroupCoordinator(val brokerId: Int,
   private def completeAndScheduleNextHeartbeatExpiration(group: GroupMetadata, member: MemberMetadata) {
     // complete current heartbeat expectation
     member.latestHeartbeat = time.milliseconds()
+    //info("===completeAndScheduleNextHeartbeatExpiration===681==="+time.milliseconds()); try { Integer.parseInt("completeAndScheduleNextHeartbeatExpiration") } catch {case e:Exception => error("===", e)}
     val memberKey = MemberKey(member.groupId, member.memberId)
     heartbeatPurgatory.checkAndComplete(memberKey)
-
     // reschedule the next heartbeat expiration deadline
     val newHeartbeatDeadline = member.latestHeartbeat + member.sessionTimeoutMs
     val delayedHeartbeat = new DelayedHeartbeat(this, group, member, newHeartbeatDeadline, member.sessionTimeoutMs)
     heartbeatPurgatory.tryCompleteElseWatch(delayedHeartbeat, Seq(memberKey))
   }
-
   private def removeHeartbeatForLeavingMember(group: GroupMetadata, member: MemberMetadata) {
+    info("===removeHeartbeatForLeavingMember===690==="+group+"==="+member)
     member.isLeaving = true
     val memberKey = MemberKey(member.groupId, member.memberId)
     heartbeatPurgatory.checkAndComplete(memberKey)
@@ -718,19 +718,19 @@ class GroupCoordinator(val brokerId: Int,
                                        member: MemberMetadata,
                                        protocols: List[(String, Array[Byte])],
                                        callback: JoinCallback) {
+    info("===supportedProtocols===721==="+protocols)
     member.supportedProtocols = protocols
     member.awaitingJoinCallback = callback
     maybePrepareRebalance(group)
   }
-
   private def maybePrepareRebalance(group: GroupMetadata) {
     group.inLock {
       if (group.canRebalance)
         prepareRebalance(group)
     }
   }
-
   private def prepareRebalance(group: GroupMetadata) {
+    //info("===prepareRebalance===733==="+group)
     // if any members are awaiting sync, cancel their request and have them rejoin
     if (group.is(CompletingRebalance))
       resetAndPropagateAssignmentError(group, Errors.REBALANCE_IN_PROGRESS)
@@ -800,10 +800,10 @@ class GroupCoordinator(val brokerId: Int,
         } else {
           info(s"Stabilized group ${group.groupId} generation ${group.generationId} " +
             s"(${Topic.GROUP_METADATA_TOPIC_NAME}-${partitionFor(group.groupId)})")
-
           // trigger the awaiting join group response callback for all the members after rebalancing
           for (member <- group.allMemberMetadata) {
             assert(member.awaitingJoinCallback != null)
+            //info("===onCompleteJoin===806==="+group.isLeader(member.memberId)+"==="+group.groupId+"==="+member.memberId); try { Integer.parseInt("onCompleteJoin") } catch {case e:Exception => error("===", e)}
             val joinResult = JoinGroupResult(
               members = if (group.isLeader(member.memberId)) {
                 group.currentMemberMetadata
@@ -848,11 +848,11 @@ class GroupCoordinator(val brokerId: Int,
 
   def partitionFor(group: String): Int = groupManager.partitionFor(group)
 
-  private def shouldKeepMemberAlive(member: MemberMetadata, heartbeatDeadline: Long) =
-    member.awaitingJoinCallback != null ||
-      member.awaitingSyncCallback != null ||
-      member.latestHeartbeat + member.sessionTimeoutMs > heartbeatDeadline
+  private def shouldKeepMemberAlive(member: MemberMetadata, heartbeatDeadline: Long) ={
 
+    //info("===shouldKeepMemberAlive===853==="+(member.awaitingJoinCallback != null)+"==="+(member.awaitingSyncCallback != null)+"==="+(member.latestHeartbeat + member.sessionTimeoutMs > heartbeatDeadline))
+    member.awaitingJoinCallback != null || member.awaitingSyncCallback != null || member.latestHeartbeat + member.sessionTimeoutMs > heartbeatDeadline
+  }
   private def isCoordinatorForGroup(groupId: String) = groupManager.isGroupLocal(groupId)
 
   private def isCoordinatorLoadInProgress(groupId: String) = groupManager.isGroupLoading(groupId)

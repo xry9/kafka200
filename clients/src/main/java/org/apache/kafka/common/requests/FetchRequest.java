@@ -212,8 +212,8 @@ public class FetchRequest extends AbstractRequest {
             this.fetchOffset = fetchOffset;
             this.logStartOffset = logStartOffset;
             this.maxBytes = maxBytes;
+            //FetchMetadata.log.info("===PartitionData===215==="+fetchOffset);try { Integer.parseInt("FetchMetadata"); }catch (Exception e){FetchMetadata.log.error("===", e);}
         }
-
         @Override
         public String toString() {
             return "(offset=" + fetchOffset + ", logStartOffset=" + logStartOffset + ", maxBytes=" + maxBytes + ")";
@@ -282,7 +282,7 @@ public class FetchRequest extends AbstractRequest {
         public Builder(short minVersion, short maxVersion, int replicaId, int maxWait, int minBytes,                        Map<TopicPartition, PartitionData> fetchData) {
             super(ApiKeys.FETCH, minVersion, maxVersion);
             this.replicaId = replicaId;
-            FetchMetadata.log.info("===FetchRequest===285==="+replicaId);//try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}
+            //FetchMetadata.log.info("===FetchRequest===285==="+replicaId);//try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}
             this.maxWait = maxWait;
             this.minBytes = minBytes;
             this.fetchData = fetchData;
@@ -346,7 +346,7 @@ public class FetchRequest extends AbstractRequest {
     private FetchRequest(short version, int replicaId, int maxWait, int minBytes, int maxBytes, Map<TopicPartition, PartitionData> fetchData, IsolationLevel isolationLevel, List<TopicPartition> toForget, FetchMetadata metadata) {
         super(version);
                                         //fetchData.size()>0
-        FetchMetadata.log.info("===FetchRequest===349==="+replicaId+"==="+fetchData);if (true) {try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}}
+        //FetchMetadata.log.info("===FetchRequest===349==="+replicaId+"==="+fetchData);//if (true) {try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}}
         this.replicaId = replicaId;
         this.maxWait = maxWait;
         this.minBytes = minBytes;
@@ -359,7 +359,7 @@ public class FetchRequest extends AbstractRequest {
     public FetchRequest(Struct struct, short version) {
         super(version);
         replicaId = struct.getInt(REPLICA_ID_KEY_NAME);
-        FetchMetadata.log.info("===FetchRequest===362==="+replicaId);//try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}
+        //FetchMetadata.log.info("===FetchRequest===362==="+replicaId);//try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}
         maxWait = struct.getInt(MAX_WAIT_KEY_NAME);
         minBytes = struct.getInt(MIN_BYTES_KEY_NAME);
         if (struct.hasField(MAX_BYTES_KEY_NAME))
@@ -381,8 +381,8 @@ public class FetchRequest extends AbstractRequest {
                 }
             }
         }
-        metadata = new FetchMetadata(struct.getOrElse(SESSION_ID, INVALID_SESSION_ID),
-            struct.getOrElse(EPOCH, FINAL_EPOCH));
+
+        metadata = new FetchMetadata(struct.getOrElse(SESSION_ID, INVALID_SESSION_ID), struct.getOrElse(EPOCH, FINAL_EPOCH));
 
         fetchData = new LinkedHashMap<>();
         for (Object topicResponseObj : struct.getArray(TOPICS_KEY_NAME)) {
@@ -396,7 +396,7 @@ public class FetchRequest extends AbstractRequest {
                 long logStartOffset = partitionResponse.hasField(LOG_START_OFFSET_KEY_NAME) ?
                     partitionResponse.getLong(LOG_START_OFFSET_KEY_NAME) : INVALID_LOG_START_OFFSET;
                 PartitionData partitionData = new PartitionData(offset, logStartOffset, maxBytes);
-                FetchMetadata.log.info("===FetchRequest===399==="+topic+"==="+partition+"==="+partitionData);
+                //FetchMetadata.log.info("===FetchRequest===399==="+topic+"==="+partition+"==="+partitionData);try { Integer.parseInt("FetchRequest"); }catch (Exception e){FetchMetadata.log.error("===", e);}
                 fetchData.put(new TopicPartition(topic, partition), partitionData);
             }
         }

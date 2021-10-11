@@ -67,7 +67,7 @@ class ReplicaFetcherThread(name: String,
   private val leaderEndpoint = leaderEndpointBlockingSend.getOrElse(
     new ReplicaFetcherBlockingSend(sourceBroker, brokerConfig, metrics, time, fetcherId,
       s"broker-$replicaId-fetcher-$fetcherId", logContext))
-  info("===ReplicaFetcherThread===70==="+leaderEndpointBlockingSend+"==="+leaderEndpoint)
+  //info("===ReplicaFetcherThread===70==="+leaderEndpointBlockingSend+"==="+sourceBroker+"==="+leaderEndpoint)
   // Visible for testing
   private[server] val fetchRequestVersion: Short =
     if (brokerConfig.interBrokerProtocolVersion >= KAFKA_2_0_IV1) 8
@@ -283,7 +283,7 @@ class ReplicaFetcherThread(name: String,
       if (partitionFetchState.isReadyForFetch && !shouldFollowerThrottle(quota, topicPartition)) {
         try {
           val logStartOffset = replicaMgr.getReplicaOrException(topicPartition).logStartOffset
-          info("===buildFetchRequest===286==="+partitionMap.size+"==="+topicPartition+"==="+(if (partitionFetchState !=null) partitionFetchState.fetchOffset else "null")+"==="+logStartOffset+"==="+fetchSize)
+          //info("===buildFetchRequest===286==="+partitionMap.size+"==="+topicPartition+"==="+(if (partitionFetchState !=null) partitionFetchState.fetchOffset else "null")+"==="+logStartOffset+"==="+fetchSize)
           builder.add(topicPartition, new JFetchRequest.PartitionData(partitionFetchState.fetchOffset, logStartOffset, fetchSize))
         } catch {
           case _: KafkaStorageException =>
@@ -301,7 +301,7 @@ class ReplicaFetcherThread(name: String,
     if (fetchMetadataSupported) {
       requestBuilder.metadata(fetchData.metadata())
     }
-    info("===buildFetchRequest===304==="+fetchData)
+    //info("===buildFetchRequest===304==="+fetchData)
     ResultWithPartitions(new FetchRequest(fetchData.sessionPartitions(), requestBuilder), partitionsWithError)
   }
 
@@ -329,7 +329,7 @@ class ReplicaFetcherThread(name: String,
           // mark the future replica for truncation only when we do last truncation
           if (offsetTruncationState.truncationCompleted)
             replicaMgr.replicaAlterLogDirsManager.markPartitionsForTruncation(brokerConfig.brokerId, tp, offsetTruncationState.offset)
-          info("===maybeTruncate===332==="+tp+"==="+offsetTruncationState)
+          //info("===maybeTruncate===332==="+tp+"==="+offsetTruncationState)
           fetchOffsets.put(tp, offsetTruncationState)
         }
       } catch {
@@ -358,7 +358,7 @@ class ReplicaFetcherThread(name: String,
     var result: Map[TopicPartition, EpochEndOffset] = null
     if (shouldSendLeaderEpochRequest) {
       val partitionsAsJava = partitions.map { case (tp, epoch) => tp -> epoch.asInstanceOf[Integer] }.toMap.asJava
-      info("===fetchEpochsFromLeader===361==="+partitionsAsJava)
+      //info("===fetchEpochsFromLeader===361==="+partitionsAsJava)
       val epochRequest = new OffsetsForLeaderEpochRequest.Builder(offsetForLeaderEpochRequestVersion, partitionsAsJava)
       try {
         val response = leaderEndpoint.sendRequest(epochRequest)

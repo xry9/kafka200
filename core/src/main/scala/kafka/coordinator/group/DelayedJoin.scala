@@ -34,7 +34,7 @@ import scala.math.{max, min}
 private[group] class DelayedJoin(coordinator: GroupCoordinator,
                                  group: GroupMetadata,
                                  rebalanceTimeout: Long) extends DelayedOperation(rebalanceTimeout, Some(group.lock)) {
-
+  //info("===DelayedJoin===37==="+group+"==="+coordinator); try { Integer.parseInt("DelayedJoin") } catch {case e:Exception => error("===", e)}
   override def tryComplete(): Boolean = coordinator.tryCompleteJoin(group, forceComplete _)
   override def onExpiration() = coordinator.onExpireJoin()
   override def onComplete() = coordinator.onCompleteJoin(group)
@@ -54,7 +54,7 @@ private[group] class InitialDelayedJoin(coordinator: GroupCoordinator,
                                         configuredRebalanceDelay: Int,
                                         delayMs: Int,
                                         remainingMs: Int) extends DelayedJoin(coordinator, group, delayMs) {
-
+  info("===InitialDelayedJoin===57==="); try { Integer.parseInt("InitialDelayedJoin") } catch {case e:Exception => error("===", e)}
   override def tryComplete(): Boolean = false
 
   override def onComplete(): Unit = {
@@ -63,8 +63,8 @@ private[group] class InitialDelayedJoin(coordinator: GroupCoordinator,
         group.newMemberAdded = false
         val delay = min(configuredRebalanceDelay, remainingMs)
         val remaining = max(remainingMs - delayMs, 0)
-        purgatory.tryCompleteElseWatch(new InitialDelayedJoin(coordinator,
-          purgatory,
+        info("===onComplete===66==="+delay+"==="+remaining+"==="+configuredRebalanceDelay)
+        purgatory.tryCompleteElseWatch(new InitialDelayedJoin(coordinator, purgatory,
           group,
           configuredRebalanceDelay,
           delay,

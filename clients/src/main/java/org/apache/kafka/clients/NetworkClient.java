@@ -462,7 +462,7 @@ public class NetworkClient implements KafkaClient {
     private void doSend(ClientRequest clientRequest, boolean isInternalRequest, long now, AbstractRequest request) {
         String destination = clientRequest.destination();
         RequestHeader header = clientRequest.makeHeader(request.version());
-        //System.out.println("===doSend===465==="+header.apiKey()+"==="+destination+"==="+header); //try { Integer.parseInt("doSend"); }catch (Exception e){e.printStackTrace();}
+        System.out.println("===doSend===465==="+header.apiKey()+"==="+destination+"==="+header); //try { Integer.parseInt("doSend"); }catch (Exception e){e.printStackTrace();}
         if (log.isDebugEnabled()) {
             int latestClientVersion = clientRequest.apiKey().latestVersion();
             if (header.apiVersion() == latestClientVersion) {
@@ -754,11 +754,11 @@ public class NetworkClient implements KafkaClient {
         for (NetworkReceive receive : this.selector.completedReceives()) {
             String source = receive.source();
             InFlightRequest req = inFlightRequests.completeNext(source);
-            Struct responseStruct = parseStructMaybeUpdateThrottleTimeMetrics(receive.payload(), req.header,
-                throttleTimeSensor, now);
+            //System.out.println("===handleCompletedReceives===757==="+req.header.apiKey());
+            Struct responseStruct = parseStructMaybeUpdateThrottleTimeMetrics(receive.payload(), req.header, throttleTimeSensor, now);
+
             if (log.isTraceEnabled()) {
-                log.trace("Completed receive from node {} for {} with correlation id {}, received {}", req.destination,
-                    req.header.apiKey(), req.header.correlationId(), responseStruct);
+                log.trace("Completed receive from node {} for {} with correlation id {}, received {}", req.destination, req.header.apiKey(), req.header.correlationId(), responseStruct);
             }
             // If the received response includes a throttle delay, throttle the connection.
             AbstractResponse body = AbstractResponse.parseResponse(req.header.apiKey(), responseStruct);

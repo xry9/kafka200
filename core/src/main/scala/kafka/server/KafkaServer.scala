@@ -265,7 +265,7 @@ class KafkaServer(val config: KafkaConfig, time: Time = Time.SYSTEM, threadNameP
 
         /* start kafka controller */
         kafkaController = new KafkaController(config, zkClient, time, metrics, brokerInfo, tokenManager, threadNamePrefix)
-        info("===startup===268===")
+        //info("===startup===268===")
         kafkaController.startup()
         adminManager = new AdminManager(config, metrics, metadataCache, zkClient)
 
@@ -345,8 +345,8 @@ class KafkaServer(val config: KafkaConfig, time: Time = Time.SYSTEM, threadNameP
     info(s"Connecting to zookeeper on ${config.zkConnect}")
 
     def createZkClient(zkConnect: String, isSecure: Boolean) =
-      KafkaZkClient(zkConnect, isSecure, config.zkSessionTimeoutMs, config.zkConnectionTimeoutMs,
-        config.zkMaxInFlightRequests, time)
+
+      KafkaZkClient(zkConnect, isSecure, config.zkSessionTimeoutMs, config.zkConnectionTimeoutMs, config.zkMaxInFlightRequests, time)
 
     val chrootIndex = config.zkConnect.indexOf("/")
     val chrootOption = {
@@ -359,10 +359,10 @@ class KafkaServer(val config: KafkaConfig, time: Time = Time.SYSTEM, threadNameP
 
     if (secureAclsEnabled && !isZkSecurityEnabled)
       throw new java.lang.SecurityException(s"${KafkaConfig.ZkEnableSecureAclsProp} is true, but the verification of the JAAS login file failed.")
-
     // make sure chroot path exists
     chrootOption.foreach { chroot =>
-      val zkConnForChrootCreation = config.zkConnect.substring(0, chrootIndex)
+    val zkConnForChrootCreation = config.zkConnect.substring(0, chrootIndex)
+
       val zkClient = createZkClient(zkConnForChrootCreation, secureAclsEnabled)
       zkClient.makeSurePersistentPathExists(chroot)
       info(s"Created zookeeper path $chroot")
@@ -659,20 +659,20 @@ class KafkaServer(val config: KafkaConfig, time: Time = Time.SYSTEM, threadNameP
     var brokerId = config.brokerId
     val brokerIdSet = mutable.HashSet[Int]()
     val offlineDirs = mutable.ArrayBuffer.empty[String]
-
+    //info("===getBrokerIdAndOfflineDirs===662==="+brokerId+"==="+config.logDirs)
     for (logDir <- config.logDirs) {
       try {
-        val brokerMetadataOpt = brokerMetadataCheckpoints(logDir).read()
-        brokerMetadataOpt.foreach { brokerMetadata =>
-          brokerIdSet.add(brokerMetadata.brokerId)
-        }
+          val brokerMetadataOpt = brokerMetadataCheckpoints(logDir).read()
+          //info("===getBrokerIdAndOfflineDirs===666==="+brokerMetadataOpt)
+          brokerMetadataOpt.foreach { brokerMetadata =>
+            brokerIdSet.add(brokerMetadata.brokerId)
+          }
       } catch {
         case e: IOException =>
-          offlineDirs += logDir
+        offlineDirs += logDir
           error(s"Fail to read $brokerMetaPropsFile under log directory $logDir", e)
       }
     }
-
     if (brokerIdSet.size > 1)
       throw new InconsistentBrokerIdException(
         s"Failed to match broker.id across log.dirs. This could happen if multiple brokers shared a log directory (log.dirs) " +

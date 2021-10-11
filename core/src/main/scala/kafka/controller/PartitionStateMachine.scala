@@ -102,7 +102,7 @@ class PartitionStateMachine(config: KafkaConfig,
     val partitionsToTrigger = partitionState.filter { case (partition, partitionState) =>
       !topicDeletionManager.isTopicQueuedUpForDeletion(partition.topic) && (partitionState.equals(OfflinePartition) || partitionState.equals(NewPartition))
     }.keys.toSeq
-    info("===triggerOnlinePartitionStateChange===105===")
+    //info("===triggerOnlinePartitionStateChange===105==="+partitionState)
     handleStateChanges(partitionsToTrigger, OnlinePartition, Option(OfflinePartitionLeaderElectionStrategy))
     // TODO: If handleStateChanges catches an exception, it is not enough to bail out and log an error.
     // It is important to trigger leader election for those partitions.
@@ -111,7 +111,7 @@ class PartitionStateMachine(config: KafkaConfig,
   def handleStateChanges(partitions: Seq[TopicPartition], targetState: PartitionState, partitionLeaderElectionStrategyOpt: Option[PartitionLeaderElectionStrategy] = None): Unit = {
     if (partitions.nonEmpty) {
       try {
-        info("===handleStateChanges===114==="+partitions+"==="+targetState); //try { Integer.parseInt("targetState") } catch { case e:Exception => error("===", e)}
+        //info("===handleStateChanges===114==="+partitions+"==="+targetState); try { Integer.parseInt("targetState") } catch { case e:Exception => error("===", e)}
         controllerBrokerRequestBatch.newBatch()
         doHandleStateChanges(partitions, targetState, partitionLeaderElectionStrategyOpt)
         controllerBrokerRequestBatch.sendRequestsToBrokers(controllerContext.epoch)
@@ -230,7 +230,7 @@ class PartitionStateMachine(config: KafkaConfig,
       val partition = createResponse.ctx.get.asInstanceOf[TopicPartition]
       val leaderIsrAndControllerEpoch = leaderIsrAndControllerEpochs(partition)
       if (code == Code.OK) {
-        info("===partitionLeadershipInfo===233==="+partition+"===="+leaderIsrAndControllerEpoch)
+        //info("===partitionLeadershipInfo===233==="+partition+"===="+leaderIsrAndControllerEpoch)
         controllerContext.partitionLeadershipInfo.put(partition, leaderIsrAndControllerEpoch)
         controllerBrokerRequestBatch.addLeaderAndIsrRequestForBrokers(leaderIsrAndControllerEpoch.leaderAndIsr.isr,
           partition, leaderIsrAndControllerEpoch, controllerContext.partitionReplicaAssignment(partition), isNew = true)
@@ -264,7 +264,6 @@ class PartitionStateMachine(config: KafkaConfig,
   /**
    * Try to elect leaders for multiple partitions.
    * Electing a leader for a partition updates partition state in zookeeper.
-   *
    * @param partitions The partitions that we're trying to elect leaders for.
    * @param partitionLeaderElectionStrategy The election strategy to use.
    * @return A tuple of three values:
@@ -287,7 +286,7 @@ class PartitionStateMachine(config: KafkaConfig,
       val currState = partitionState(partition)
       if (getDataResponse.resultCode == Code.OK) {
         val leaderIsrAndControllerEpochOpt = TopicPartitionStateZNode.decode(getDataResponse.data, getDataResponse.stat)
-        info("===doElectLeaderForPartitions===290==="+partition+"==="+leaderIsrAndControllerEpochOpt)
+        //info("===doElectLeaderForPartitions===290==="+partition+"==="+leaderIsrAndControllerEpochOpt)
         if (leaderIsrAndControllerEpochOpt.isEmpty) {
           val exception = new StateChangeFailedException(s"LeaderAndIsr information doesn't exist for partition $partition in $currState state")
           failedElections.put(partition, exception)
@@ -311,7 +310,7 @@ class PartitionStateMachine(config: KafkaConfig,
       return (Seq.empty, Seq.empty, failedElections.toMap)
     }
     val shuttingDownBrokers  = controllerContext.shuttingDownBrokerIds.toSet
-    info("===doElectLeaderForPartitions===314==="+partitionLeaderElectionStrategy+"==="+leaderIsrAndControllerEpochPerPartition)
+    //info("===doElectLeaderForPartitions===314==="+partitionLeaderElectionStrategy+"==="+leaderIsrAndControllerEpochPerPartition)
     val (partitionsWithoutLeaders, partitionsWithLeaders) = partitionLeaderElectionStrategy match {
       case OfflinePartitionLeaderElectionStrategy =>
         leaderForOffline(validPartitionsForElection).partition { case (_, newLeaderAndIsrOpt, _) => newLeaderAndIsrOpt.isEmpty }
@@ -334,20 +333,21 @@ class PartitionStateMachine(config: KafkaConfig,
     successfulUpdates.foreach { case (partition, leaderAndIsr) =>
       val replicas = controllerContext.partitionReplicaAssignment(partition)
       val leaderIsrAndControllerEpoch = LeaderIsrAndControllerEpoch(leaderAndIsr, controllerContext.epoch)
-      info("===partitionLeadershipInfo===337==="+partition+"==="+leaderIsrAndControllerEpoch); //try { Integer.parseInt("partitionLeadershipInfo") } catch { case e:Exception => error("===", e)}
+      //info("===partitionLeadershipInfo===337==="+partition+"==="+leaderIsrAndControllerEpoch); //try { Integer.parseInt("partitionLeadershipInfo") } catch { case e:Exception => error("===", e)}
       controllerContext.partitionLeadershipInfo.put(partition, leaderIsrAndControllerEpoch)
       controllerBrokerRequestBatch.addLeaderAndIsrRequestForBrokers(recipientsPerPartition(partition), partition, leaderIsrAndControllerEpoch, replicas, isNew = false)
     }
     (successfulUpdates.keys.toSeq, updatesToRetry, failedElections.toMap ++ failedUpdates)
   }
-  private def leaderForOffline(leaderIsrAndControllerEpochs: Seq[(TopicPartition, LeaderIsrAndControllerEpoch)]):
-  Seq[(TopicPartition, Option[LeaderAndIsr], Seq[Int])] = {
+  private def leaderForOffline(leaderIsrAndControllerEpochs: Seq[(TopicPartition, LeaderIsrAndControllerEpoch)]): Seq[(TopicPartition, Option[LeaderAndIsr], Seq[Int])] = {
+    //info("===leaderForOffline===343===")
     val (partitionsWithNoLiveInSyncReplicas, partitionsWithLiveInSyncReplicas) = leaderIsrAndControllerEpochs.partition { case (partition, leaderIsrAndControllerEpoch) =>
       val liveInSyncReplicas = leaderIsrAndControllerEpoch.leaderAndIsr.isr.filter(replica => controllerContext.isReplicaOnline(replica, partition))
       liveInSyncReplicas.isEmpty
     }
     val (logConfigs, failed) = zkClient.getLogConfigs(partitionsWithNoLiveInSyncReplicas.map { case (partition, _) => partition.topic }, config.originals())
     val partitionsWithUncleanLeaderElectionState = partitionsWithNoLiveInSyncReplicas.map { case (partition, leaderIsrAndControllerEpoch) =>
+      //info("===leaderForOffline===350==="+(failed.contains(partition.topic))+"==="+failed+"==="+partition.topic)
       if (failed.contains(partition.topic)) {
         logFailedStateChange(partition, partitionState(partition), OnlinePartition, failed(partition.topic))
         (partition, None, false)
@@ -362,14 +362,14 @@ class PartitionStateMachine(config: KafkaConfig,
         val leaderIsrAndControllerEpoch = leaderIsrAndControllerEpochOpt.get
         val isr = leaderIsrAndControllerEpoch.leaderAndIsr.isr
         val leaderOpt = PartitionLeaderElectionAlgorithms.offlinePartitionLeaderElection(assignment, isr, liveReplicas.toSet, uncleanLeaderElectionEnabled, controllerContext)
-        info("===leaderForOffline===365==="+partition+"==="+assignment+"==="+liveReplicas+"==="+isr+"==="+isr.length)
+        //info("===leaderForOffline===365==="+partition+"==="+assignment+"==="+liveReplicas+"==="+isr+"==="+isr.length+"==="+leaderOpt)
         val newLeaderAndIsrOpt = leaderOpt.map { leader =>
           val newIsr = if (isr.contains(leader)) isr.filter(replica => controllerContext.isReplicaOnline(replica, partition))
           else List(leader)
-          info("===leaderForOffline===369==="+partition+"==="+leader+"==="+newIsr)
+          //info("===leaderForOffline===369==="+partition+"==="+leader+"==="+newIsr)
           leaderIsrAndControllerEpoch.leaderAndIsr.newLeaderAndIsr(leader, newIsr)
         }
-        info("===leaderForOffline===372==="+partition+"==="+newLeaderAndIsrOpt+"==="+liveReplicas+"==="+leaderIsrAndControllerEpochs)
+        //info("===leaderForOffline===372==="+partition+"==="+newLeaderAndIsrOpt+"==="+liveReplicas+"==="+leaderIsrAndControllerEpochs)
         (partition, newLeaderAndIsrOpt, liveReplicas)
       } else {
         (partition, None, liveReplicas)

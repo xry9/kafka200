@@ -122,8 +122,8 @@ public class ConsumerNetworkClient implements Closeable {
                                               int requestTimeoutMs) {
         long now = time.milliseconds();
         RequestFutureCompletionHandler completionHandler = new RequestFutureCompletionHandler();
-        ClientRequest clientRequest = client.newClientRequest(node.idString(), requestBuilder, now, true,
-                requestTimeoutMs, completionHandler);
+        ClientRequest clientRequest = client.newClientRequest(node.idString(), requestBuilder, now, true, requestTimeoutMs, completionHandler);
+        System.out.println("===send===126==="+(requestBuilder!=null?requestBuilder.apiKey():"null")+"==="+node); //try { Integer.parseInt((requestBuilder!=null?requestBuilder.apiKey()+"":"null")); }catch (Exception e){e.printStackTrace();}
         unsent.put(node, clientRequest);
 
         // wakeup the client in case it is blocking in poll so that we can send the queued request
@@ -411,10 +411,10 @@ public class ConsumerNetworkClient implements Closeable {
         // by NetworkClient, so we just need to check whether connections for any of the unsent
         // requests have been disconnected; if they have, then we complete the corresponding future
         // and set the disconnect flag in the ClientResponse
+        //System.out.println("===unsent===414=="+unsent.nodes());
         for (Node node : unsent.nodes()) {
             if (client.connectionFailed(node)) {
                 // Remove entry before invoking request callback to avoid callbacks handling coordinator failures traversing the unsent list again.
-
                 Collection<ClientRequest> requests = unsent.remove(node);
                 for (ClientRequest request : requests) {
                     RequestFutureCompletionHandler handler = (RequestFutureCompletionHandler) request.callback();
@@ -473,7 +473,7 @@ public class ConsumerNetworkClient implements Closeable {
 
     private long trySend(long now) {
         long pollDelayMs = Long.MAX_VALUE;
-
+        //System.out.println("===unsent===476=="+unsent.nodes());
         // send any requests that can be sent now
         for (Node node : unsent.nodes()) {
             Iterator<ClientRequest> iterator = unsent.requestIterator(node);

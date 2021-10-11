@@ -19,7 +19,7 @@ package kafka.coordinator.group
 
 import java.util
 
-import kafka.utils.nonthreadsafe
+import kafka.utils.{Logging, nonthreadsafe}
 import org.apache.kafka.common.protocol.Errors
 
 
@@ -57,8 +57,8 @@ private[group] class MemberMetadata(val memberId: String,
                                     val rebalanceTimeoutMs: Int,
                                     val sessionTimeoutMs: Int,
                                     val protocolType: String,
-                                    var supportedProtocols: List[(String, Array[Byte])]) {
-
+                                    var supportedProtocols: List[(String, Array[Byte])]) extends Logging{
+  //info("===supportedProtocols===61==="+supportedProtocols); try { Integer.parseInt("supportedProtocols") } catch {case e:Exception => error("===", e)}
   var assignment: Array[Byte] = Array.empty[Byte]
   var awaitingJoinCallback: JoinGroupResult => Unit = null
   var awaitingSyncCallback: (Array[Byte], Errors) => Unit = null

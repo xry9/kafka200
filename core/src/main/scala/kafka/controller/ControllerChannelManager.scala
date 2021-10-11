@@ -81,7 +81,7 @@ class ControllerChannelManager(controllerContext: ControllerContext, config: Kaf
       val stateInfoOpt = brokerStateInfo.get(brokerId)
       stateInfoOpt match {
         case Some(stateInfo) =>
-        info("===sendRequest===84==="+apiKey+"==="+request); //try { Integer.parseInt("sendRequest") } catch { case e:Exception => error("===", e)}
+        //info("===sendRequest===84==="+apiKey+"==="+request); //try { Integer.parseInt("sendRequest") } catch { case e:Exception => error("===", e)}
         stateInfo.messageQueue.put(QueueItem(apiKey, request, callback, time.milliseconds()))
         case None =>
           warn(s"Not sending request $request to broker $brokerId, since it is offline.")
@@ -211,7 +211,7 @@ class RequestSendThread(val controllerId: Int,
                         val stateChangeLogger: StateChangeLogger,
                         name: String)
   extends ShutdownableThread(name = name) {
-  info("===RequestSendThread===214==="); //try { Integer.parseInt("RequestSendThread") } catch { case e:Exception => error("===", e)}
+  //info("===RequestSendThread===214==="); //try { Integer.parseInt("RequestSendThread") } catch { case e:Exception => error("===", e)}
   logIdent = s"[RequestSendThread controllerId=$controllerId] "
 
   private val socketTimeoutMs = config.controllerSocketTimeoutMs
@@ -329,7 +329,7 @@ class ControllerBrokerRequestBatch(controller: KafkaController, stateChangeLogge
     brokerIds.filter(_ >= 0).foreach { brokerId =>
       val result = leaderAndIsrRequestMap.getOrElseUpdate(brokerId, mutable.Map.empty)
       val alreadyNew = result.get(topicPartition).exists(_.isNew)
-      info("===addLeaderAndIsrRequestForBrokers===332==="+topicPartition+"==="+brokerId+"==="+alreadyNew+"==="+isNew+"==="+leaderIsrAndControllerEpoch.leaderAndIsr.leader); try { Integer.parseInt("addLeaderAndIsrRequestForBrokers") } catch { case e:Exception => error("===", e)}
+      //info("===addLeaderAndIsrRequestForBrokers===332==="+topicPartition+"==="+brokerId+"==="+alreadyNew+"==="+isNew+"==="+leaderIsrAndControllerEpoch.leaderAndIsr.leader); try { Integer.parseInt("addLeaderAndIsrRequestForBrokers") } catch { case e:Exception => error("===", e)}
       result.put(topicPartition, new LeaderAndIsrRequest.PartitionState(leaderIsrAndControllerEpoch.controllerEpoch,
         leaderIsrAndControllerEpoch.leaderAndIsr.leader,
         leaderIsrAndControllerEpoch.leaderAndIsr.leaderEpoch,
@@ -363,7 +363,7 @@ class ControllerBrokerRequestBatch(controller: KafkaController, stateChangeLogge
           val offlineReplicas = replicas.filter(!controllerContext.isReplicaOnline(_, partition))
           val leaderIsrAndControllerEpoch = if (beingDeleted) {
             val leaderDuringDelete = LeaderAndIsr.duringDelete(leaderAndIsr.isr)
-            info("===updateMetadataRequestPartitionInfo===366==="+leaderDuringDelete)
+            //info("===updateMetadataRequestPartitionInfo===366==="+leaderDuringDelete)
             LeaderIsrAndControllerEpoch(leaderDuringDelete, controllerEpoch)
           } else {
             l
@@ -399,7 +399,7 @@ class ControllerBrokerRequestBatch(controller: KafkaController, stateChangeLogge
       val leaderAndIsrRequestVersion: Short =
         if (controller.config.interBrokerProtocolVersion >= KAFKA_1_0_IV0) 1
         else 0
-      info("===sendRequestsToBrokers===402==="+controllerEpoch+"==="+leaderAndIsrRequestMap); try { Integer.parseInt("sendRequestsToBrokers") } catch { case e:Exception => error("===", e)}
+      //info("===sendRequestsToBrokers===402==="+controllerEpoch+"==="+leaderAndIsrRequestMap.size+"==="+leaderAndIsrRequestMap); try { Integer.parseInt("sendRequestsToBrokers") } catch { case e:Exception => error("===", e)}
       leaderAndIsrRequestMap.foreach { case (broker, leaderAndIsrPartitionStates) =>
         leaderAndIsrPartitionStates.foreach { case (topicPartition, state) =>
           val typeOfRequest =
@@ -411,7 +411,7 @@ class ControllerBrokerRequestBatch(controller: KafkaController, stateChangeLogge
         val leaders = controllerContext.liveOrShuttingDownBrokers.filter(b => leaderIds.contains(b.id)).map {
           _.node(controller.config.interBrokerListenerName)
         }
-        info("===sendRequestsToBrokers===414==="+broker+"==="+leaderIds+"==="+leaders)
+        //info("===sendRequestsToBrokers===414==="+broker+"==="+leaderIds+"==="+leaders)
         val leaderAndIsrRequestBuilder = new LeaderAndIsrRequest.Builder(leaderAndIsrRequestVersion, controllerId, controllerEpoch, leaderAndIsrPartitionStates.asJava, leaders.asJava)
         controller.sendRequest(broker, ApiKeys.LEADER_AND_ISR, leaderAndIsrRequestBuilder,
           (r: AbstractResponse) => controller.eventManager.put(controller.LeaderAndIsrResponseReceived(r, broker)))

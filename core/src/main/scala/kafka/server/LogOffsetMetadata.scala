@@ -17,6 +17,7 @@
 
 package kafka.server
 
+import kafka.utils.Logging
 import org.apache.kafka.common.KafkaException
 
 object LogOffsetMetadata {
@@ -31,7 +32,6 @@ object LogOffsetMetadata {
   }
 
 }
-
 /*
  * A log offset structure, including:
  *  1. the message offset
@@ -40,8 +40,8 @@ object LogOffsetMetadata {
  */
 case class LogOffsetMetadata(messageOffset: Long,
                              segmentBaseOffset: Long = LogOffsetMetadata.UnknownSegBaseOffset,
-                             relativePositionInSegment: Int = LogOffsetMetadata.UnknownFilePosition) {
-
+                             relativePositionInSegment: Int = LogOffsetMetadata.UnknownFilePosition) extends Logging{
+  //info("===LogOffsetMetadata===44==="+messageOffset+"==="+segmentBaseOffset+"==="+relativePositionInSegment)
   // check if this offset is already on an older segment compared with the given offset
   def onOlderSegment(that: LogOffsetMetadata): Boolean = {
     if (messageOffsetOnly)

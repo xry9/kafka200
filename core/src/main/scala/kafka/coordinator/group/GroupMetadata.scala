@@ -104,7 +104,7 @@ private[group] case object Dead extends GroupState
 private[group] case object Empty extends GroupState
 
 
-private object GroupMetadata {
+private object GroupMetadata extends Logging {
   private val validPreviousStates: Map[GroupState, Set[GroupState]] =
     Map(Dead -> Set(Stable, PreparingRebalance, CompletingRebalance, Empty, Dead),
       CompletingRebalance -> Set(PreparingRebalance),
@@ -124,11 +124,11 @@ private object GroupMetadata {
     group.protocolType = if (protocolType == null || protocolType.isEmpty) None else Some(protocolType)
     group.protocol = Option(protocol)
     group.leaderId = Option(leaderId)
+    //info("===leaderId===127==="+leaderId+"==="+protocol+"==="+protocolType+"==="+generationId); try { Integer.parseInt("leaderId") } catch {case e:Exception => error("===", e)}
     members.foreach(group.add)
     group
   }
 }
-
 /**
  * Case class used to represent group metadata for the ListGroups API
  */
@@ -203,14 +203,14 @@ private[group] class GroupMetadata(val groupId: String, initialState: GroupState
     assert(groupId == member.groupId)
     assert(this.protocolType.orNull == member.protocolType)
     assert(supportsProtocols(member.protocols))
-
-    if (leaderId.isEmpty)
-      leaderId = Some(member.memberId)
+    if (leaderId.isEmpty) leaderId = Some(member.memberId)
+    //info("===leaderId===207==="+member.memberId)
+    //info("===add===208==="+members.size+"==="+(if(member!=null)member.memberId else "null")+"==="+leaderId); try { Integer.parseInt("add") } catch {case e:Exception => error("===", e)}
     members.put(member.memberId, member)
   }
-
   def remove(memberId: String) {
     members.remove(memberId)
+    //info("===leaderId===213==="+members.size+"==="+memberId+"==="+(isLeader(memberId))+"==="+(if(members.keys!=null) members.keys.head+"==="+members.keys else "null")); try { Integer.parseInt("leaderId") } catch {case e:Exception => error("===", e)}
     if (isLeader(memberId)) {
       leaderId = if (members.isEmpty) {
         None
@@ -231,17 +231,17 @@ private[group] class GroupMetadata(val groupId: String, initialState: GroupState
   def rebalanceTimeoutMs = members.values.foldLeft(0) { (timeout, member) =>
     timeout.max(member.rebalanceTimeoutMs)
   }
-
   // TODO: decide if ids should be predictable or random
   def generateMemberIdSuffix = UUID.randomUUID().toString
-
-  def canRebalance = GroupMetadata.validPreviousStates(PreparingRebalance).contains(state)
-
+  def canRebalance = {
+    //info("===canRebalance===237==="+state+"==="+GroupMetadata.validPreviousStates(PreparingRebalance).contains(state)); try { Integer.parseInt("canRebalance") } catch {case e:Exception => error("===", e)}
+    GroupMetadata.validPreviousStates(PreparingRebalance).contains(state)
+  }
   def transitionTo(groupState: GroupState) {
     assertValidTransition(groupState)
+    info("===transitionTo===242==="+state+"==="+groupState); try { Integer.parseInt("transitionTo") } catch { case e:Exception => error("===", e)}
     state = groupState
   }
-
   def selectProtocol: String = {
     if (members.isEmpty)
       throw new IllegalStateException("Cannot select protocol for empty group")
@@ -311,7 +311,7 @@ private[group] class GroupMetadata(val groupId: String, initialState: GroupState
 
   def initializeOffsets(offsets: collection.Map[TopicPartition, CommitRecordMetadataAndOffset],
                         pendingTxnOffsets: Map[Long, mutable.Map[TopicPartition, CommitRecordMetadataAndOffset]]) {
-    //info("===initializeOffsets===314==="+offsets)
+    //info("===offsets===314==="+offsets)
     this.offsets ++= offsets
     this.pendingTransactionalOffsetCommits ++= pendingTxnOffsets
   }

@@ -181,7 +181,6 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
     public boolean hasCompletedFetches() {
         return !completedFetches.isEmpty();
     }
-
     /**
      * Set-up a fetch request for any node that we have assigned partitions for which doesn't already have
      * an in-flight fetch or pending fetch data.
@@ -189,6 +188,7 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
      */
     public int sendFetches() {
         Map<Node, FetchSessionHandler.FetchRequestData> fetchRequestMap = prepareFetchRequests();
+        //System.out.println("===sendFetches===191==="+fetchRequestMap.size());
         for (Map.Entry<Node, FetchSessionHandler.FetchRequestData> entry : fetchRequestMap.entrySet()) {
             final Node fetchTarget = entry.getKey();
             final FetchSessionHandler.FetchRequestData data = entry.getValue();
@@ -902,16 +902,16 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
 
         try {
             if (!subscriptions.isFetchable(tp)) {
-                // this can happen when a rebalance happened or a partition consumption paused
-                // while fetch is still in-flight
+                // this can happen when a rebalance happened or a partition consumption paused while fetch is still in-flight
+
                 log.debug("Ignoring fetched records for partition {} since it is no longer fetchable", tp);
             } else if (error == Errors.NONE) {
                 // we are interested in this fetch only if the beginning offset matches the
                 // current consumed position
                 Long position = subscriptions.position(tp);
                 if (position == null || position != fetchOffset) {
-                    log.debug("Discarding stale fetch response for partition {} since its offset {} does not match " +
-                            "the expected offset {}", tp, fetchOffset, position);
+                    log.debug("Discarding stale fetch response for partition {} since its offset {} does not match " + "the expected offset {}", tp, fetchOffset, position);
+
                     return null;
                 }
 

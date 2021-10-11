@@ -45,7 +45,7 @@ import scala.collection.mutable.ListBuffer
  */
 abstract class DelayedOperation(override val delayMs: Long,
     lockOpt: Option[Lock] = None) extends TimerTask with Logging {
-
+  //info("===DelayedOperation===48==="+this.getClass.getName); try { Integer.parseInt("DelayedOperation") } catch {case e:Exception => error("===", e)}
   private val completed = new AtomicBoolean(false)
   private val tryCompletePending = new AtomicBoolean(false)
   // Visible for testing
@@ -135,11 +135,11 @@ abstract class DelayedOperation(override val delayMs: Long,
     } while (!isCompleted && retry)
     done
   }
-
   /*
    * run() method defines a task that is executed on timeout
    */
   override def run(): Unit = {
+    info("===run===142==="+this); try { Integer.parseInt("run") } catch {case e:Exception => error("===", e)}
     if (forceComplete())
       onExpiration()
   }
@@ -238,8 +238,8 @@ final class DelayedOperationPurgatory[T <: DelayedOperation](purgatoryName: Stri
       // If the operation is already completed, stop adding it to the rest of the watcher list.
       if (operation.isCompleted)
         return false
+      //info("===tryCompleteElseWatch===241==="+operation)
       watchForOperation(key, operation)
-
       if (!watchCreated) {
         watchCreated = true
         estimatedTotalOperations.incrementAndGet()
@@ -249,17 +249,17 @@ final class DelayedOperationPurgatory[T <: DelayedOperation](purgatoryName: Stri
     isCompletedByMe = operation.maybeTryComplete()
     if (isCompletedByMe)
       return true
-
     // if it cannot be completed by now and hence is watched, add to the expire queue also
     if (!operation.isCompleted) {
-      if (timerEnabled)
+      if (timerEnabled){
+        //info("===tryCompleteElseWatch===255==="+operation+"==="+timeoutTimer.getClass.getName)
         timeoutTimer.add(operation)
+      }
       if (operation.isCompleted) {
         // cancel the timer task
         operation.cancel()
       }
     }
-
     false
   }
 
@@ -355,9 +355,9 @@ final class DelayedOperationPurgatory[T <: DelayedOperation](purgatoryName: Stri
 
     // add the element to watch
     def watch(t: T) {
+      info("===Watchers===358==="+t)
       operations.add(t)
     }
-
     // traverse the list and try to complete some watched elements
     def tryCompleteWatched(): Int = {
       var completed = 0

@@ -661,7 +661,7 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
                 clientId = "consumer-" + CONSUMER_CLIENT_ID_SEQUENCE.getAndIncrement();
             this.clientId = clientId;
             String groupId = config.getString(ConsumerConfig.GROUP_ID_CONFIG);
-            System.out.println("===KafkaConsumer===664==="+groupId+"==="+clientId);
+            //System.out.println("===KafkaConsumer===664==="+groupId+"==="+clientId);
             LogContext logContext = new LogContext("[Consumer clientId=" + clientId + ", groupId=" + groupId + "] ");
             this.log = logContext.logger(getClass());
 

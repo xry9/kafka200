@@ -18,11 +18,11 @@
 package kafka.controller
 
 import kafka.cluster.Broker
+import kafka.utils.Logging
 import org.apache.kafka.common.TopicPartition
-
 import scala.collection.{Seq, Set, mutable}
 
-class ControllerContext {
+class ControllerContext extends Logging {
   val stats = new ControllerStats
 
   var controllerChannelManager: ControllerChannelManager = null
@@ -40,8 +40,8 @@ class ControllerContext {
   private var liveBrokerIdsUnderlying: Set[Int] = Set.empty
 
   def partitionReplicaAssignment(topicPartition: TopicPartition): Seq[Int] = {
-    partitionReplicaAssignmentUnderlying.getOrElse(topicPartition.topic, mutable.Map.empty)
-      .getOrElse(topicPartition.partition, Seq.empty)
+
+    partitionReplicaAssignmentUnderlying.getOrElse(topicPartition.topic, mutable.Map.empty).getOrElse(topicPartition.partition, Seq.empty)
   }
 
   private def clearTopicsState(): Unit = {
@@ -51,10 +51,10 @@ class ControllerContext {
     partitionsBeingReassigned.clear()
     replicasOnOfflineDirs.clear()
   }
-
   def updatePartitionReplicaAssignment(topicPartition: TopicPartition, newReplicas: Seq[Int]): Unit = {
-    partitionReplicaAssignmentUnderlying.getOrElseUpdate(topicPartition.topic, mutable.Map.empty)
-      .put(topicPartition.partition, newReplicas)
+    //info("===updatePartitionReplicaAssignment===55==="+topicPartition+"==="+newReplicas+"==="+partitionReplicaAssignmentUnderlying)
+    partitionReplicaAssignmentUnderlying.getOrElseUpdate(topicPartition.topic, mutable.Map.empty).put(topicPartition.partition, newReplicas)
+    //info("===updatePartitionReplicaAssignment===57==="+topicPartition+"==="+newReplicas+"==="+partitionReplicaAssignmentUnderlying)
   }
 
   def partitionReplicaAssignmentForTopic(topic : String): Map[TopicPartition, Seq[Int]] = {
@@ -93,12 +93,12 @@ class ControllerContext {
       }
     }.toSet
   }
-
   def isReplicaOnline(brokerId: Int, topicPartition: TopicPartition, includeShuttingDownBrokers: Boolean = false): Boolean = {
     val brokerOnline = {
       if (includeShuttingDownBrokers) liveOrShuttingDownBrokerIds.contains(brokerId)
       else liveBrokerIds.contains(brokerId)
     }
+//    info("===isReplicaOnline===101==="+topicPartition+"==="+brokerOnline+"==="+brokerId+"==="+replicasOnOfflineDirs)
     brokerOnline && !replicasOnOfflineDirs.getOrElse(brokerId, Set.empty).contains(topicPartition)
   }
 

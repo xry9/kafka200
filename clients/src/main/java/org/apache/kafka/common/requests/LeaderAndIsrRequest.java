@@ -149,7 +149,7 @@ public class LeaderAndIsrRequest extends AbstractRequest {
         this.controllerEpoch = controllerEpoch;
         this.partitionStates = partitionStates;
         this.liveLeaders = liveLeaders;
-        System.out.println("===LeaderAndIsrRequest===152==="+partitionStates);
+        //System.out.println("===LeaderAndIsrRequest===152==="+partitionStates);
     }
 
     public LeaderAndIsrRequest(Struct struct, short version) {
@@ -178,7 +178,7 @@ public class LeaderAndIsrRequest extends AbstractRequest {
             boolean isNew = partitionStateData.hasField(IS_NEW_KEY_NAME) ? partitionStateData.getBoolean(IS_NEW_KEY_NAME) : false;
             PartitionState partitionState = new PartitionState(controllerEpoch, leader, leaderEpoch, isr, zkVersion, replicas, isNew);
             partitionStates.put(new TopicPartition(topic, partition), partitionState);
-            System.out.println("===LeaderAndIsrRequest===181==="+partitionStates);
+            //System.out.println("===LeaderAndIsrRequest===181==="+partitionStates);
         }
 
         Set<Node> leaders = new HashSet<>();
@@ -193,7 +193,7 @@ public class LeaderAndIsrRequest extends AbstractRequest {
         controllerEpoch = struct.getInt(CONTROLLER_EPOCH_KEY_NAME);
         this.partitionStates = partitionStates;
         this.liveLeaders = leaders;
-        System.out.println("===LeaderAndIsrRequest===196==="+partitionStates);
+        //System.out.println("===LeaderAndIsrRequest===196==="+partitionStates);
     }
 
     @Override

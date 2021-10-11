@@ -164,7 +164,7 @@ class KafkaZkClient private (zooKeeperClient: ZooKeeperClient, isSecure: Boolean
     * @return UpdateLeaderAndIsrResult instance containing per partition results.
     */
   def updateLeaderAndIsr(leaderAndIsrs: Map[TopicPartition, LeaderAndIsr], controllerEpoch: Int): UpdateLeaderAndIsrResult = {
-    info("===updateLeaderAndIsr===167==="+leaderAndIsrs+"==="); //try { Integer.parseInt("updateLeaderAndIsr") } catch { case e:Exception => error("===", e)}
+    //info("===updateLeaderAndIsr===167==="+leaderAndIsrs+"==="); //try { Integer.parseInt("updateLeaderAndIsr") } catch { case e:Exception => error("===", e)}
     val successfulUpdates = mutable.Map.empty[TopicPartition, LeaderAndIsr]
     val updatesToRetry = mutable.Buffer.empty[TopicPartition]
     val failed = mutable.Map.empty[TopicPartition, Exception]
@@ -898,7 +898,7 @@ class KafkaZkClient private (zooKeeperClient: ZooKeeperClient, isSecure: Boolean
   def getControllerId: Option[Int] = {
     val getDataRequest = GetDataRequest(ControllerZNode.path)
     val getDataResponse = retryRequestUntilConnected(getDataRequest)
-    info("===getControllerId===901==="+ControllerZNode.path+"==="+getDataResponse.resultCode+"==="+getDataResponse.data)
+    //info("===getControllerId===901==="+ControllerZNode.path+"==="+getDataResponse.resultCode+"==="+getDataResponse.data)
     getDataResponse.resultCode match {
       case Code.OK => ControllerZNode.decode(getDataResponse.data)
       case Code.NONODE => None
@@ -1244,9 +1244,9 @@ class KafkaZkClient private (zooKeeperClient: ZooKeeperClient, isSecure: Boolean
    * @param zNodeChildChangeHandler
    */
   def registerZNodeChildChangeHandler(zNodeChildChangeHandler: ZNodeChildChangeHandler): Unit = {
+    //info("===registerZNodeChildChangeHandler===1247==="+zNodeChildChangeHandler.path+"==="+zNodeChildChangeHandler); try { Integer.parseInt("registerZNodeChildChangeHandler") } catch {case e:Exception => error("")}
     zooKeeperClient.registerZNodeChildChangeHandler(zNodeChildChangeHandler)
   }
-
   /**
    * See ZooKeeperClient.unregisterZNodeChildChangeHandler
    * @param path

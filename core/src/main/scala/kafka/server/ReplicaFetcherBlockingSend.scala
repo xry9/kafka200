@@ -19,6 +19,7 @@ package kafka.server
 import java.net.SocketTimeoutException
 
 import kafka.cluster.BrokerEndPoint
+import kafka.utils.Logging
 import org.apache.kafka.clients._
 import org.apache.kafka.common.metrics.Metrics
 import org.apache.kafka.common.network._
@@ -44,8 +45,8 @@ class ReplicaFetcherBlockingSend(sourceBroker: BrokerEndPoint,
                                  time: Time,
                                  fetcherId: Int,
                                  clientId: String,
-                                 logContext: LogContext) extends BlockingSend {
-
+                                 logContext: LogContext) extends BlockingSend with Logging{
+  //info("===ReplicaFetcherBlockingSend===49==="+clientId+"==="+sourceBroker)
   private val sourceNode = new Node(sourceBroker.id, sourceBroker.host, sourceBroker.port)
   private val socketTimeout: Int = brokerConfig.replicaSocketTimeoutMs
 
@@ -69,6 +70,7 @@ class ReplicaFetcherBlockingSend(sourceBroker: BrokerEndPoint,
       channelBuilder,
       logContext
     )
+
     new NetworkClient(
       selector,
       new ManualMetadataUpdater(),
@@ -79,8 +81,7 @@ class ReplicaFetcherBlockingSend(sourceBroker: BrokerEndPoint,
       Selectable.USE_DEFAULT_BUFFER_SIZE,
       brokerConfig.replicaSocketReceiveBufferBytes,
       brokerConfig.requestTimeoutMs,
-      time,
-      false,
+      time, false,
       new ApiVersions,
       logContext
     )
@@ -91,8 +92,8 @@ class ReplicaFetcherBlockingSend(sourceBroker: BrokerEndPoint,
       if (!NetworkClientUtils.awaitReady(networkClient, sourceNode, time, socketTimeout))
         throw new SocketTimeoutException(s"Failed to connect within $socketTimeout ms")
       else {
-        val clientRequest = networkClient.newClientRequest(sourceBroker.id.toString, requestBuilder,
-          time.milliseconds(), true)
+
+        val clientRequest = networkClient.newClientRequest(sourceBroker.id.toString, requestBuilder, time.milliseconds(), true)
         NetworkClientUtils.sendAndReceive(networkClient, clientRequest, time)
       }
     }

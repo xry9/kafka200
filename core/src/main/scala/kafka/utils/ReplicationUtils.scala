@@ -28,11 +28,11 @@ object ReplicationUtils extends Logging {
     debug(s"Updated ISR for $partition to ${newLeaderAndIsr.isr.mkString(",")}")
     val path = TopicPartitionStateZNode.path(partition)
     val newLeaderData = TopicPartitionStateZNode.encode(LeaderIsrAndControllerEpoch(newLeaderAndIsr, controllerEpoch))
-    info("===updateLeaderAndIsr===31==="+partition+"==="+path+"==="+newLeaderAndIsr)
+    //info("===updateLeaderAndIsr===31==="+partition+"==="+path+"==="+newLeaderAndIsr)
     // use the epoch of the controller that made the leadership decision, instead of the current controller epoch
     val updatePersistentPath: (Boolean, Int) = zkClient.conditionalUpdatePath(path, newLeaderData, newLeaderAndIsr.zkVersion, Some(checkLeaderAndIsrZkData))
 
-    info("===updateLeaderAndIsr===35==="+updatePersistentPath+"==="+path+"==="+partition+"==="+newLeaderAndIsr); //try { Integer.parseInt("updateLeaderAndIsr") } catch { case e:Exception => error("===", e)}
+    //info("===updateLeaderAndIsr===35==="+updatePersistentPath+"==="+path+"==="+partition+"==="+newLeaderAndIsr); //try { Integer.parseInt("updateLeaderAndIsr") } catch { case e:Exception => error("===", e)}
     updatePersistentPath
   }
   private def checkLeaderAndIsrZkData(zkClient: KafkaZkClient, path: String, expectedLeaderAndIsrInfo: Array[Byte]): (Boolean, Int) = {

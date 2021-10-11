@@ -20,7 +20,7 @@ import java.util.concurrent.{DelayQueue, Executors, ThreadFactory, TimeUnit}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
-import kafka.utils.threadsafe
+import kafka.utils.{Logging, threadsafe}
 import org.apache.kafka.common.utils.{KafkaThread, Time}
 
 trait Timer {
@@ -55,7 +55,7 @@ trait Timer {
 class SystemTimer(executorName: String,
                   tickMs: Long = 1,
                   wheelSize: Int = 20,
-                  startMs: Long = Time.SYSTEM.hiResClockMs) extends Timer {
+                  startMs: Long = Time.SYSTEM.hiResClockMs) extends Timer with Logging{
 
   // timeout timer
   private[this] val taskExecutor = Executors.newFixedThreadPool(1, new ThreadFactory() {
@@ -77,24 +77,24 @@ class SystemTimer(executorName: String,
   private[this] val readWriteLock = new ReentrantReadWriteLock()
   private[this] val readLock = readWriteLock.readLock()
   private[this] val writeLock = readWriteLock.writeLock()
-
   def add(timerTask: TimerTask): Unit = {
     readLock.lock()
     try {
+      //info("===addTimerTaskEntry===83==="+timerTask)
       addTimerTaskEntry(new TimerTaskEntry(timerTask, timerTask.delayMs + Time.SYSTEM.hiResClockMs))
     } finally {
       readLock.unlock()
     }
   }
-
   private def addTimerTaskEntry(timerTaskEntry: TimerTaskEntry): Unit = {
     if (!timingWheel.add(timerTaskEntry)) {
       // Already expired or cancelled
-      if (!timerTaskEntry.cancelled)
+      if (!timerTaskEntry.cancelled){
+        //info("===addTimerTaskEntry===93==="+timerTaskEntry.timerTask); try { Integer.parseInt("addTimerTaskEntry") } catch {case e:Exception => error("===", e)}
         taskExecutor.submit(timerTaskEntry.timerTask)
+      }
     }
   }
-
   private[this] val reinsert = (timerTaskEntry: TimerTaskEntry) => addTimerTaskEntry(timerTaskEntry)
 
   /*

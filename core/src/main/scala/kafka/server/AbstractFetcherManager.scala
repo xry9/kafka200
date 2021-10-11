@@ -116,12 +116,12 @@ abstract class AbstractFetcherManager(protected val name: String, clientId: Stri
       val partitionsPerFetcher = partitionAndOffsets.groupBy { case(topicPartition, brokerAndInitialFetchOffset) =>
         BrokerAndFetcherId(brokerAndInitialFetchOffset.broker, getFetcherId(topicPartition.topic, topicPartition.partition))}
       def addAndStartFetcherThread(brokerAndFetcherId: BrokerAndFetcherId, brokerIdAndFetcherId: BrokerIdAndFetcherId) {
-        info("===addAndStartFetcherThread===119==="+brokerAndFetcherId); try { Integer.parseInt("partitionsPerFetcher") } catch { case e:Exception => error("===", e)}
+        //info("===addAndStartFetcherThread===119==="+brokerAndFetcherId); try { Integer.parseInt("partitionsPerFetcher") } catch { case e:Exception => error("===", e)}
         val fetcherThread = createFetcherThread(brokerAndFetcherId.fetcherId, brokerAndFetcherId.broker)
         fetcherThreadMap.put(brokerIdAndFetcherId, fetcherThread)
         fetcherThread.start
       }
-      info("===createFetcherThread===124==="+partitionsPerFetcher+"==="+fetcherThreadMap); try { Integer.parseInt("partitionsPerFetcher") } catch { case e:Exception => error("===", e)}
+      //info("===createFetcherThread===124==="+partitionsPerFetcher+"==="+fetcherThreadMap); try { Integer.parseInt("partitionsPerFetcher") } catch { case e:Exception => error("===", e)}
       for ((brokerAndFetcherId, initialFetchOffsets) <- partitionsPerFetcher) {
         val brokerIdAndFetcherId = BrokerIdAndFetcherId(brokerAndFetcherId.broker.id, brokerAndFetcherId.fetcherId)
         fetcherThreadMap.get(brokerIdAndFetcherId) match {

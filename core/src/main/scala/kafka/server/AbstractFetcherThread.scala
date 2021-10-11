@@ -128,7 +128,7 @@ abstract class AbstractFetcherThread(name: String,
     handlePartitionsWithErrors(partitionsWithError)
     if (epochRequests.nonEmpty) {
       val fetchedEpochs = fetchEpochsFromLeader(epochRequests)
-      info("===maybeTruncate===131==="+fetchedEpochs)
+      //info("===maybeTruncate===131==="+fetchedEpochs)
       //Ensure we hold a lock during truncation.
       inLock(partitionMapLock) {
         //Check no leadership changes happened whilst we were unlocked, fetching epochs
@@ -508,7 +508,7 @@ case class ClientIdTopicPartition(clientId: String, topic: String, partitionId: 
   * (3) ReadyForFetch, the is the active state where the thread is actively fetching data.
   */
 case class PartitionFetchState(fetchOffset: Long, delay: DelayedItem, truncatingLog: Boolean = false) extends Logging{
-  info("===PartitionFetchState===511==="+fetchOffset); try { Integer.parseInt("PartitionFetchState") } catch {case e:Exception => error("===", e)}
+  //info("===PartitionFetchState===511==="+fetchOffset); try { Integer.parseInt("PartitionFetchState") } catch {case e:Exception => error("===", e)}
   def this(offset: Long, truncatingLog: Boolean) = this(offset, new DelayedItem(0), truncatingLog)
 
   def this(offset: Long, delay: DelayedItem) = this(offset, delay, false)

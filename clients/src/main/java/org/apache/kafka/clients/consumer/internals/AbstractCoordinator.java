@@ -145,7 +145,7 @@ public abstract class AbstractCoordinator implements Closeable {
         this.heartbeat = heartbeat;
         this.sensors = new GroupCoordinatorMetrics(metrics, metricGrpPrefix);
         this.retryBackoffMs = retryBackoffMs;
-        System.out.println("===AbstractCoordinator===148===");//try { Integer.parseInt("AbstractCoordinator"); }catch (Exception e){e.printStackTrace();}
+        //System.out.println("===AbstractCoordinator===148===");//try { Integer.parseInt("AbstractCoordinator"); }catch (Exception e){e.printStackTrace();}
     }
     public AbstractCoordinator(LogContext logContext,
                                ConsumerNetworkClient client,
@@ -513,12 +513,12 @@ public abstract class AbstractCoordinator implements Closeable {
                 this.generation.memberId,
                 protocolType(),
                 metadata()).setRebalanceTimeout(this.rebalanceTimeoutMs);
+        //System.out.println("===sendJoinGroupRequest===516==="+this.generation.memberId);
 
         log.debug("Sending JoinGroup ({}) to coordinator {}", requestBuilder, this.coordinator);
 
         // Note that we override the request timeout using the rebalance timeout since that is the
         // maximum time that it may block on the coordinator. We add an extra 5 seconds for small delays.
-
         int joinGroupTimeoutMs = Math.max(rebalanceTimeoutMs, rebalanceTimeoutMs + 5000);
         return client.send(coordinator, requestBuilder, joinGroupTimeoutMs).compose(new JoinGroupResponseHandler());
 
@@ -528,18 +528,18 @@ public abstract class AbstractCoordinator implements Closeable {
         @Override
         public void handle(JoinGroupResponse joinResponse, RequestFuture<ByteBuffer> future) {
             Errors error = joinResponse.error();
+            //System.out.println("===JoinGroupResponseHandler===531==="+(error == Errors.NONE));
             if (error == Errors.NONE) {
                 log.debug("Received successful JoinGroup response: {}", joinResponse);
                 sensors.joinLatency.record(response.requestLatencyMs());
-
                 synchronized (AbstractCoordinator.this) {
                     if (state != MemberState.REBALANCING) {
-                        // if the consumer was woken up before a rebalance completes, we may have already left
-                        // the group. In this case, we do not want to continue with the sync group.
+                        // if the consumer was woken up before a rebalance completes, we may have already left the group. In this case, we do not want to continue with the sync group.
+
                         future.raise(new UnjoinedGroupException());
                     } else {
-                        AbstractCoordinator.this.generation = new Generation(joinResponse.generationId(),
-                                joinResponse.memberId(), joinResponse.groupProtocol());
+                        AbstractCoordinator.this.generation = new Generation(joinResponse.generationId(), joinResponse.memberId(), joinResponse.groupProtocol());
+                        //System.out.println("===JoinGroupResponseHandler===542==="+(joinResponse.isLeader())+"==="+joinResponse.leaderId()+"==="+joinResponse.memberId());
                         if (joinResponse.isLeader()) {
                             onJoinLeader(joinResponse).chain(future);
                         } else {
@@ -588,9 +588,9 @@ public abstract class AbstractCoordinator implements Closeable {
 
     private RequestFuture<ByteBuffer> onJoinLeader(JoinGroupResponse joinResponse) {
         try {
+
             // perform the leader synchronization and send back the assignment for the group
-            Map<String, ByteBuffer> groupAssignment = performAssignment(joinResponse.leaderId(), joinResponse.groupProtocol(),
-                    joinResponse.members());
+            Map<String, ByteBuffer> groupAssignment = performAssignment(joinResponse.leaderId(), joinResponse.groupProtocol(), joinResponse.members());
 
             SyncGroupRequest.Builder requestBuilder =
                     new SyncGroupRequest.Builder(groupId, generation.generationId, generation.memberId, groupAssignment);
@@ -610,8 +610,8 @@ public abstract class AbstractCoordinator implements Closeable {
 
     private class SyncGroupResponseHandler extends CoordinatorResponseHandler<SyncGroupResponse, ByteBuffer> {
         @Override
-        public void handle(SyncGroupResponse syncResponse,
-                           RequestFuture<ByteBuffer> future) {
+        public void handle(SyncGroupResponse syncResponse, RequestFuture<ByteBuffer> future) {
+
             Errors error = syncResponse.error();
             if (error == Errors.NONE) {
                 sensors.syncLatency.record(response.requestLatencyMs());
@@ -670,10 +670,10 @@ public abstract class AbstractCoordinator implements Closeable {
                     // for the coordinator in the underlying network client layer
                     int coordinatorConnectionId = Integer.MAX_VALUE - findCoordinatorResponse.node().id();
 
-                    AbstractCoordinator.this.coordinator = new Node(
-                            coordinatorConnectionId,
+                    AbstractCoordinator.this.coordinator = new Node(coordinatorConnectionId,
                             findCoordinatorResponse.node().host(),
                             findCoordinatorResponse.node().port());
+                    //System.out.println("===FindCoordinatorResponseHandler===676==="+findCoordinatorResponse.node());
                     log.info("Discovered group coordinator {}", coordinator);
                     client.tryConnect(coordinator);
                     heartbeat.resetTimeouts(time.milliseconds());

@@ -33,7 +33,7 @@ object ControllerEventManager {
 }
 class ControllerEventManager(controllerId: Int, rateAndTimeMetrics: Map[ControllerState, KafkaTimer],
                              eventProcessedListener: ControllerEvent => Unit) extends KafkaMetricsGroup {
-  info("===ControllerEventManager===36==="); try { Integer.parseInt("ControllerEventManager") } catch {case e:Exception => error("===", e)}
+  //info("===ControllerEventManager===36==="); try { Integer.parseInt("ControllerEventManager") } catch {case e:Exception => error("===", e)}
   @volatile private var _state: ControllerState = ControllerState.Idle
   private val putLock = new ReentrantLock()
   private val queue = new LinkedBlockingQueue[ControllerEvent]
@@ -62,7 +62,7 @@ class ControllerEventManager(controllerId: Int, rateAndTimeMetrics: Map[Controll
   }
 
   def put(event: ControllerEvent): Unit = inLock(putLock) {
-    info("===queue===65==="+event); try { Integer.parseInt("queue") } catch { case e:Exception => error("===", e)}
+    //info("===queue===65==="+event); try { Integer.parseInt("queue") } catch { case e:Exception => error("===", e)}
     queue.put(event)
   }
   def clearAndPut(event: ControllerEvent): Unit = inLock(putLock) {
@@ -82,7 +82,7 @@ class ControllerEventManager(controllerId: Int, rateAndTimeMetrics: Map[Controll
           eventQueueTimeHist.update(time.milliseconds() - controllerEvent.enqueueTimeMs)
           try {
             rateAndTimeMetrics(state).time {
-              info("===doWork===85==="+controllerEvent.getClass.getName)
+              //info("===doWork===85==="+controllerEvent.getClass.getName)
               controllerEvent.process()
             }
           } catch {

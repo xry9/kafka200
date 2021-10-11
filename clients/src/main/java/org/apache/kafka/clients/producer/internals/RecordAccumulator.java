@@ -571,8 +571,8 @@ public final class RecordAccumulator {
                                             // responses.
                                             batch.setProducerState(producerIdAndEpoch, transactionManager.sequenceNumber(batch.topicPartition), isTransactional);
                                             transactionManager.incrementSequenceNumber(batch.topicPartition, batch.recordCount);
-                                            log.debug("Assigned producerId {} and producerEpoch {} to batch with base sequence " +
-                                                            "{} being sent to partition {}", producerIdAndEpoch.producerId,
+
+                                            log.debug("Assigned producerId {} and producerEpoch {} to batch with base sequence " + "{} being sent to partition {}", producerIdAndEpoch.producerId,
                                                     producerIdAndEpoch.epoch, batch.baseSequence(), tp);
 
                                             transactionManager.addInFlightBatch(batch);
@@ -607,7 +607,7 @@ public final class RecordAccumulator {
             return d;
         d = new ArrayDeque<>();
         Deque<ProducerBatch> previous = this.batches.putIfAbsent(tp, d);
-        //System.out.println("===getOrCreateDeque===610==="); //try { Integer.parseInt("getOrCreateDeque"); }catch (Exception e){e.printStackTrace();}
+        //System.out.println("===getOrCreateDeque===610==="); try { Integer.parseInt("getOrCreateDeque"); }catch (Exception e){e.printStackTrace();}
         if (previous == null)
             return d;
         else

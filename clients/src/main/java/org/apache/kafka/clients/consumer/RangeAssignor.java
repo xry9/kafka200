@@ -59,12 +59,12 @@ public class RangeAssignor extends AbstractPartitionAssignor {
     }
 
     @Override
-    public Map<String, List<TopicPartition>> assign(Map<String, Integer> partitionsPerTopic,
-                                                    Map<String, Subscription> subscriptions) {
+    public Map<String, List<TopicPartition>> assign(Map<String, Integer> partitionsPerTopic, Map<String, Subscription> subscriptions) {
         Map<String, List<String>> consumersPerTopic = consumersPerTopic(subscriptions);
         Map<String, List<TopicPartition>> assignment = new HashMap<>();
-        for (String memberId : subscriptions.keySet())
+        for (String memberId : subscriptions.keySet()) {
             assignment.put(memberId, new ArrayList<TopicPartition>());
+        }
 
         for (Map.Entry<String, List<String>> topicEntry : consumersPerTopic.entrySet()) {
             String topic = topicEntry.getKey();
@@ -75,15 +75,15 @@ public class RangeAssignor extends AbstractPartitionAssignor {
                 continue;
 
             Collections.sort(consumersForTopic);
-
+            //System.out.println("===assign===78==="+numPartitionsForTopic+"==="+consumersForTopic);
             int numPartitionsPerConsumer = numPartitionsForTopic / consumersForTopic.size();
             int consumersWithExtraPartition = numPartitionsForTopic % consumersForTopic.size();
-
             List<TopicPartition> partitions = AbstractPartitionAssignor.partitions(topic, numPartitionsForTopic);
             for (int i = 0, n = consumersForTopic.size(); i < n; i++) {
                 int start = numPartitionsPerConsumer * i + Math.min(i, consumersWithExtraPartition);
                 int length = numPartitionsPerConsumer + (i + 1 > consumersWithExtraPartition ? 0 : 1);
                 assignment.get(consumersForTopic.get(i)).addAll(partitions.subList(start, start + length));
+                //System.out.println("===assign===86==="+consumersForTopic.get(i)+"==="+start+"==="+length+"==="+partitions.subList(start, start + length));
             }
         }
         return assignment;

@@ -55,7 +55,7 @@ object Kafka extends Logging {
 
   def main(args: Array[String]): Unit = {
     try {
-      println("===main===58==="+args.length+"==="+(if(args.length>0) args(0) else "null"))
+      //println("===main===58==="+args.length+"==="+(if(args.length>0) args(0) else "null"))
       val serverProps = getPropsFromArgs(args)
       val kafkaServerStartable = KafkaServerStartable.fromProps(serverProps)
       try {

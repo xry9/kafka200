@@ -101,7 +101,7 @@ class KafkaApis(val requestChannel: RequestChannel,
     try {
       trace(s"Handling request:${request.requestDesc(true)} from connection ${request.context.connectionId};" +
         s"securityProtocol:${request.context.securityProtocol},principal:${request.context.principal}")
-      logger.info("===handle===104==="+request.header.apiKey+"==="+request.header.clientId()+"==="+request.header)
+      //logger.info("===handle===104==="+request.header.apiKey+"==="+request.header.clientId()+"==="+request.header)
       request.header.apiKey match {
         case ApiKeys.PRODUCE => handleProduceRequest(request)
         case ApiKeys.FETCH => handleFetchRequest(request)
@@ -181,7 +181,7 @@ class KafkaApis(val requestChannel: RequestChannel,
       }
     }
     if (authorize(request.session, ClusterAction, Resource.ClusterResource)) {
-      info("===handleLeaderAndIsrRequest===184==="+leaderAndIsrRequest.partitionStates)
+      //info("===handleLeaderAndIsrRequest===184==="+leaderAndIsrRequest.partitionStates)
       val response = replicaManager.becomeLeaderOrFollower(correlationId, leaderAndIsrRequest, onLeadershipChange)
       sendResponseExemptThrottle(request, response)
     } else {
@@ -222,7 +222,7 @@ class KafkaApis(val requestChannel: RequestChannel,
   def handleUpdateMetadataRequest(request: RequestChannel.Request) {
     val correlationId = request.header.correlationId
     val updateMetadataRequest = request.body[UpdateMetadataRequest]
-    info("===handleUpdateMetadataRequest===225==="+(authorize(request.session, ClusterAction, Resource.ClusterResource))+"==="+request.header.clientId())
+    //info("===handleUpdateMetadataRequest===225==="+(authorize(request.session, ClusterAction, Resource.ClusterResource))+"==="+request.header.clientId())
     if (authorize(request.session, ClusterAction, Resource.ClusterResource)) {
       val deletedPartitions = replicaManager.maybeUpdateMetadataCache(correlationId, updateMetadataRequest)
       if (deletedPartitions.nonEmpty)
@@ -381,7 +381,7 @@ class KafkaApis(val requestChannel: RequestChannel,
    * Handle a produce request
    */
   def handleProduceRequest(request: RequestChannel.Request) {
-    info("===handleProduceRequest===384==="+request)
+    //info("===handleProduceRequest===384==="+request)
     val produceRequest = request.body[ProduceRequest]
     val numBytesAppended = request.header.toStruct.sizeOf + request.sizeOfBodyInBytes
     if (produceRequest.isTransactional) {
@@ -505,12 +505,11 @@ class KafkaApis(val requestChannel: RequestChannel,
           fetchRequest.fetchData(),
           fetchRequest.toForget(),
           fetchRequest.isFromFollower())
-    info("===handleFetchRequest===508==="+fetchContext.getClass.getName); //try { Integer.parseInt("handleFetchRequest") } catch { case e:Exception => error("===", e)}
+    //info("===handleFetchRequest===508==="+fetchContext.getClass.getName); //try { Integer.parseInt("handleFetchRequest") } catch { case e:Exception => error("===", e)}
     def errorResponse[T >: MemoryRecords <: BaseRecords](error: Errors): FetchResponse.PartitionData[T] = {
       new FetchResponse.PartitionData[T](error, FetchResponse.INVALID_HIGHWATERMARK, FetchResponse.INVALID_LAST_STABLE_OFFSET,
         FetchResponse.INVALID_LOG_START_OFFSET, null, MemoryRecords.EMPTY)
     }
-
     val erroneous = mutable.ArrayBuffer[(TopicPartition, FetchResponse.PartitionData[Records])]()
     val interesting = mutable.ArrayBuffer[(TopicPartition, FetchRequest.PartitionData)]()
     if (fetchRequest.isFromFollower()) {
@@ -519,8 +518,10 @@ class KafkaApis(val requestChannel: RequestChannel,
         fetchContext.foreachPartition { (topicPartition, data) =>
           if (!metadataCache.contains(topicPartition))
             erroneous += topicPartition -> errorResponse(Errors.UNKNOWN_TOPIC_OR_PARTITION)
-          else
+          else{
             interesting += (topicPartition -> data)
+            //info("===interesting===523==="+topicPartition)
+          }
         }
       } else {
         fetchContext.foreachPartition { (part, _) =>
@@ -534,13 +535,13 @@ class KafkaApis(val requestChannel: RequestChannel,
           erroneous += topicPartition -> errorResponse(Errors.TOPIC_AUTHORIZATION_FAILED)
         else if (!metadataCache.contains(topicPartition))
           erroneous += topicPartition -> errorResponse(Errors.UNKNOWN_TOPIC_OR_PARTITION)
-        else
+        else{
           interesting += (topicPartition -> data)
+          info("===interesting===540==="+topicPartition)
+        }
       }
     }
-
-    def maybeConvertFetchedData(tp: TopicPartition,
-                                partitionData: FetchResponse.PartitionData[Records]): FetchResponse.PartitionData[BaseRecords] = {
+    def maybeConvertFetchedData(tp: TopicPartition, partitionData: FetchResponse.PartitionData[Records]): FetchResponse.PartitionData[BaseRecords] = {
       // Down-conversion of the fetched records is needed when the stored magic version is
       // greater than that supported by the client (as indicated by the fetch request version). If the
       // configured magic version for the topic is less than or equal to that supported by the version of the
@@ -559,7 +560,6 @@ class KafkaApis(val requestChannel: RequestChannel,
           else
             None
         }
-
       // For fetch requests from clients, check if down-conversion is disabled for the particular partition
       if (downConvertMagic.isDefined && !fetchRequest.isFromFollower && !logConfig.forall(_.messageDownConversionEnable)) {
         trace(s"Conversion to message format ${downConvertMagic.get} is disabled for partition $tp. Sending unsupported version response to $clientId.")
@@ -1175,21 +1175,21 @@ class KafkaApis(val requestChannel: RequestChannel,
 
   def handleFindCoordinatorRequest(request: RequestChannel.Request) {
     val findCoordinatorRequest = request.body[FindCoordinatorRequest]
-
-    if (findCoordinatorRequest.coordinatorType == FindCoordinatorRequest.CoordinatorType.GROUP &&
-        !authorize(request.session, Describe, Resource(Group, findCoordinatorRequest.coordinatorKey, LITERAL)))
+    //info("===handleFindCoordinatorRequest===1178==="+(findCoordinatorRequest.coordinatorType == FindCoordinatorRequest.CoordinatorType.GROUP &&  !authorize(request.session, Describe, Resource(Group, findCoordinatorRequest.coordinatorKey, LITERAL)))+"==="+(findCoordinatorRequest.coordinatorType == FindCoordinatorRequest.CoordinatorType.TRANSACTION && !authorize(request.session, Describe, Resource(TransactionalId, findCoordinatorRequest.coordinatorKey, LITERAL)))+"===")
+    if (findCoordinatorRequest.coordinatorType == FindCoordinatorRequest.CoordinatorType.GROUP &&  !authorize(request.session, Describe, Resource(Group, findCoordinatorRequest.coordinatorKey, LITERAL)))
       sendErrorResponseMaybeThrottle(request, Errors.GROUP_AUTHORIZATION_FAILED.exception)
-    else if (findCoordinatorRequest.coordinatorType == FindCoordinatorRequest.CoordinatorType.TRANSACTION &&
-        !authorize(request.session, Describe, Resource(TransactionalId, findCoordinatorRequest.coordinatorKey, LITERAL)))
+
+    else if (findCoordinatorRequest.coordinatorType == FindCoordinatorRequest.CoordinatorType.TRANSACTION && !authorize(request.session, Describe, Resource(TransactionalId, findCoordinatorRequest.coordinatorKey, LITERAL)))
       sendErrorResponseMaybeThrottle(request, Errors.TRANSACTIONAL_ID_AUTHORIZATION_FAILED.exception)
+
     else {
       // get metadata (and create the topic if necessary)
       val (partition, topicMetadata) = findCoordinatorRequest.coordinatorType match {
         case FindCoordinatorRequest.CoordinatorType.GROUP =>
           val partition = groupCoordinator.partitionFor(findCoordinatorRequest.coordinatorKey)
           val metadata = getOrCreateInternalTopic(GROUP_METADATA_TOPIC_NAME, request.context.listenerName)
+          //info("===handleFindCoordinatorRequest===1191==="+partition+"==="+metadata)
           (partition, metadata)
-
         case FindCoordinatorRequest.CoordinatorType.TRANSACTION =>
           val partition = txnCoordinator.partitionFor(findCoordinatorRequest.coordinatorKey)
           val metadata = getOrCreateInternalTopic(TRANSACTION_STATE_TOPIC_NAME, request.context.listenerName)
@@ -1207,7 +1207,7 @@ class KafkaApis(val requestChannel: RequestChannel,
             .find(_.partition == partition)
             .map(_.leader)
             .flatMap(p => Option(p))
-
+          //info("===handleFindCoordinatorRequest===1210==="+coordinatorEndpoint)
           coordinatorEndpoint match {
             case Some(endpoint) if !endpoint.isEmpty =>
               new FindCoordinatorResponse(requestThrottleMs, Errors.NONE, endpoint)
@@ -1258,16 +1258,16 @@ class KafkaApis(val requestChannel: RequestChannel,
 
   def handleJoinGroupRequest(request: RequestChannel.Request) {
     val joinGroupRequest = request.body[JoinGroupRequest]
-
+    //info("===handleJoinGroupRequest===1261==="+joinGroupRequest.groupId()+"==="+joinGroupRequest.memberId()+"==="+joinGroupRequest.protocolType())
     // the callback for sending a join-group response
     def sendResponseCallback(joinResult: JoinGroupResult) {
       val members = joinResult.members map { case (memberId, metadataArray) => (memberId, ByteBuffer.wrap(metadataArray)) }
+      //info("===handleJoinGroupRequest===1265==="+(if(joinResult!=null) (joinResult.memberId+"==="+joinResult.leaderId) else "null")); try { Integer.parseInt("createResponse") } catch {case e:Exception => error("===", e)}
       def createResponse(requestThrottleMs: Int): AbstractResponse = {
         val responseBody = new JoinGroupResponse(requestThrottleMs, joinResult.error, joinResult.generationId,
-          joinResult.subProtocol, joinResult.memberId, joinResult.leaderId, members.asJava)
+        joinResult.subProtocol, joinResult.memberId, joinResult.leaderId, members.asJava)
+        trace("Sending join group response %s for correlation id %d to client %s.".format(responseBody, request.header.correlationId, request.header.clientId))
 
-        trace("Sending join group response %s for correlation id %d to client %s."
-          .format(responseBody, request.header.correlationId, request.header.clientId))
         responseBody
       }
       sendResponseMaybeThrottle(request, createResponse)
@@ -1303,10 +1303,10 @@ class KafkaApis(val requestChannel: RequestChannel,
 
   def handleSyncGroupRequest(request: RequestChannel.Request) {
     val syncGroupRequest = request.body[SyncGroupRequest]
-
+    //info("===handleSyncGroupRequest===1306===")
     def sendResponseCallback(memberState: Array[Byte], error: Errors) {
-      sendResponseMaybeThrottle(request, requestThrottleMs =>
-        new SyncGroupResponse(requestThrottleMs, error, ByteBuffer.wrap(memberState)))
+      info("===sendResponseCallback===1308==="); try { Integer.parseInt("sendResponseCallback") } catch {case e:Exception => logger.error("===", e)}
+      sendResponseMaybeThrottle(request, requestThrottleMs => new SyncGroupResponse(requestThrottleMs, error, ByteBuffer.wrap(memberState)))
     }
 
     if (!authorize(request.session, Read, Resource(Group, syncGroupRequest.groupId(), LITERAL))) {
@@ -2287,9 +2287,9 @@ class KafkaApis(val requestChannel: RequestChannel,
 
   // Throttle the channel if the request quota is enabled but has been violated. Regardless of throttling, send the
   // response immediately.
-  private def sendResponseMaybeThrottle(request: RequestChannel.Request,
-                                        createResponse: Int => AbstractResponse,
+  private def sendResponseMaybeThrottle(request: RequestChannel.Request, createResponse: Int => AbstractResponse,
                                         onComplete: Option[Send => Unit] = None): Unit = {
+
     val throttleTimeMs = quotas.request.maybeRecordAndGetThrottleTimeMs(request)
     quotas.request.throttle(request, throttleTimeMs, sendResponse)
     sendResponse(request, Some(createResponse(throttleTimeMs)), onComplete)

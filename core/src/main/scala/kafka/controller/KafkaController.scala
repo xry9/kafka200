@@ -165,7 +165,7 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
         expireEvent.waitUntilProcessingStarted()
       }
     })
-    info("===startup===168===")
+    //info("===startup===168===")
     eventManager.put(Startup)
     eventManager.start()
   }
@@ -224,9 +224,9 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
     incrementControllerEpoch()
     info("Registering handlers")
 
+
     // before reading source of truth from zookeeper, register the listeners to get broker/topic callbacks
-    val childChangeHandlers = Seq(brokerChangeHandler, topicChangeHandler, topicDeletionHandler, logDirEventNotificationHandler,
-      isrChangeNotificationHandler)
+    val childChangeHandlers = Seq(brokerChangeHandler, topicChangeHandler, topicDeletionHandler, logDirEventNotificationHandler, isrChangeNotificationHandler)
     childChangeHandlers.foreach(zkClient.registerZNodeChildChangeHandler)
     val nodeChangeHandlers = Seq(preferredReplicaElectionHandler, partitionReassignmentHandler)
     nodeChangeHandlers.foreach(zkClient.registerZNodeChangeHandlerAndCheckExistence)
@@ -376,7 +376,7 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
         s"${newBrokers.mkString(",")}. Signaling restart of topic deletion for these topics")
       topicDeletionManager.resumeDeletionForTopics(replicasForTopicsToBeDeleted.map(_.topic))
     }
-    info("===onBrokerStartup===379==="+newBrokers)
+    //info("===onBrokerStartup===379==="+newBrokers)
     registerBrokerModificationsHandler(newBrokers)
   }
   private def registerBrokerModificationsHandler(brokerIds: Iterable[Int]): Unit = {
@@ -722,7 +722,7 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
   private def updateLeaderAndIsrCache(partitions: Seq[TopicPartition] = controllerContext.allPartitions.toSeq) {
     val leaderIsrAndControllerEpochs = zkClient.getTopicPartitionStates(partitions)
     leaderIsrAndControllerEpochs.foreach { case (partition, leaderIsrAndControllerEpoch) =>
-    info("===partitionLeadershipInfo===725==="+partition+"==="+leaderIsrAndControllerEpoch); try { Integer.parseInt("partitionLeadershipInfo") } catch { case e:Exception => error("===", e)}
+    //info("===partitionLeadershipInfo===725==="+partition+"==="+leaderIsrAndControllerEpoch); try { Integer.parseInt("partitionLeadershipInfo") } catch { case e:Exception => error("===", e)}
     controllerContext.partitionLeadershipInfo.put(partition, leaderIsrAndControllerEpoch)
     }
   }
@@ -914,15 +914,15 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
    */
   private[controller] def sendUpdateMetadataRequest(brokers: Seq[Int], partitions: Set[TopicPartition] = Set.empty[TopicPartition]) {
     try {
+      //info("===sendUpdateMetadataRequest===917==="+brokers+"==="+partitions); try { Integer.parseInt("sendUpdateMetadataRequest") } catch { case e:Exception => error("===", e)}
       brokerRequestBatch.newBatch()
       brokerRequestBatch.addUpdateMetadataRequestForBrokers(brokers, partitions)
       brokerRequestBatch.sendRequestsToBrokers(epoch)
     } catch {
       case e: IllegalStateException =>
-        handleIllegalState(e)
+      handleIllegalState(e)
     }
   }
-
   /**
    * Does not change leader or isr, but just increments the leader epoch
    *
@@ -1201,7 +1201,7 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
      * We can get here during the initial startup and the handleDeleted ZK callback. Because of the potential race condition,
      * it's possible that the controller has already been elected when we get here. This check will prevent the following createEphemeralPath method from getting into an infinite loop if this broker is already the controller.
      */
-    info("===elect===1204==="+activeControllerId); //try { Integer.parseInt("elect") } catch { case e:Exception => error("===", e) }
+    //info("===elect===1204==="+activeControllerId); try { Integer.parseInt("elect") } catch { case e:Exception => error("===", e) }
     if (activeControllerId != -1) {
       debug(s"Broker $activeControllerId has been elected as the controller, so stopping the election process.")
       return
@@ -1210,7 +1210,7 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
       zkClient.checkedEphemeralCreate(ControllerZNode.path, ControllerZNode.encode(config.brokerId, timestamp))
       info(s"${config.brokerId} successfully elected as the controller")
       activeControllerId = config.brokerId
-      info("===elect===1213==="+ControllerZNode.path+"==="+config.brokerId)
+      //info("===elect===1213==="+ControllerZNode.path+"==="+config.brokerId)
       onControllerFailover()
     } catch {
       case _: NodeExistsException =>
@@ -1231,13 +1231,14 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
   case object BrokerChange extends ControllerEvent {
     override def state: ControllerState = ControllerState.BrokerChange
     override def process(): Unit = {
-      info("===process===1234==="+isActive); try { Integer.parseInt("process") } catch { case e:Exception => error("===", e)}
+      //info("===process===1234==="+isActive); try { Integer.parseInt("process") } catch { case e:Exception => error("===", e)}
       if (!isActive) return
       val curBrokers = zkClient.getAllBrokersInCluster.toSet
       val curBrokerIds = curBrokers.map(_.id)
       val liveOrShuttingDownBrokerIds = controllerContext.liveOrShuttingDownBrokerIds
       val newBrokerIds = curBrokerIds -- liveOrShuttingDownBrokerIds
       val deadBrokerIds = liveOrShuttingDownBrokerIds -- curBrokerIds
+      //info("===process===1241==="+deadBrokerIds+"==="+liveOrShuttingDownBrokerIds +"==="+ curBrokerIds)
       val newBrokers = curBrokers.filter(broker => newBrokerIds(broker.id))
       controllerContext.liveBrokers = curBrokers
       val newBrokerIdsSorted = newBrokerIds.toSeq.sorted
@@ -1245,7 +1246,6 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
       val liveBrokerIdsSorted = curBrokerIds.toSeq.sorted
       info(s"Newly added brokers: ${newBrokerIdsSorted.mkString(",")}, " +
         s"deleted brokers: ${deadBrokerIdsSorted.mkString(",")}, all live brokers: ${liveBrokerIdsSorted.mkString(",")}")
-
       newBrokers.foreach(controllerContext.controllerChannelManager.addBroker)
       deadBrokerIds.foreach(controllerContext.controllerChannelManager.removeBroker)
       if (newBrokerIds.nonEmpty)
@@ -1497,8 +1497,8 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
       }
     }
   }
-
   case object Reelect extends ControllerEvent {
+    info("===Reelect===1501==="); try { Integer.parseInt("Reelect") } catch { case e:Exception => error("===", e)}
     override def state = ControllerState.ControllerChange
     override def process(): Unit = {
       val wasActiveBeforeChange = isActive
@@ -1507,7 +1507,7 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
       if (wasActiveBeforeChange && !isActive) {
         onControllerResignation()
       }
-      //info("===process===1510===")
+      info("===process===1510===")
       elect()
     }
   }
@@ -1539,10 +1539,10 @@ class KafkaController(val config: KafkaConfig, zkClient: KafkaZkClient, time: Ti
 
 }
 
-class BrokerChangeHandler(controller: KafkaController, eventManager: ControllerEventManager) extends ZNodeChildChangeHandler {
+class BrokerChangeHandler(controller: KafkaController, eventManager: ControllerEventManager) extends ZNodeChildChangeHandler with Logging {
   override val path: String = BrokerIdsZNode.path
-
   override def handleChildChange(): Unit = {
+    //info("===handleChildChange===1545===")
     eventManager.put(controller.BrokerChange)
   }
 }
@@ -1642,7 +1642,7 @@ case class PartitionAndReplica(topicPartition: TopicPartition, replica: Int) {
   }
 }
 case class LeaderIsrAndControllerEpoch(leaderAndIsr: LeaderAndIsr, controllerEpoch: Int) extends Logging {
-  info("===LeaderIsrAndControllerEpoch===1645==="+leaderAndIsr); //try { Integer.parseInt("LeaderIsrAndControllerEpoch") } catch { case e:Exception => error("===", e)}
+  //info("===LeaderIsrAndControllerEpoch===1645==="+leaderAndIsr); //try { Integer.parseInt("LeaderIsrAndControllerEpoch") } catch { case e:Exception => error("===", e)}
   override def toString: String = {
     val leaderAndIsrInfo = new StringBuilder
     leaderAndIsrInfo.append("(Leader:" + leaderAndIsr.leader)

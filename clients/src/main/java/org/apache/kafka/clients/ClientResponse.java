@@ -103,12 +103,12 @@ public class ClientResponse {
     public long requestLatencyMs() {
         return latencyMs;
     }
-
     public void onComplete() {
-        if (callback != null)
+        if (callback != null) {
+            //System.out.println("===onComplete===108===");
             callback.onComplete(this);
+        }
     }
-
     @Override
     public String toString() {
         return "ClientResponse(receivedTimeMs=" + receivedTimeMs +

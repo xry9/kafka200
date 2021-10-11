@@ -697,7 +697,7 @@ class LogManager(logDirs: Seq[File],
           else
             currentLogs.put(topicPartition, log)
           info(s"Created log for partition $topicPartition in $logDir with properties " + s"{${config.originals.asScala.mkString(", ")}}.")
-          info("===getOrCreateLog===700==="+topicPartition); try { Integer.parseInt("getOrCreateLog") }catch { case e: Exception =>error("===", e) }
+          //info("===getOrCreateLog===700==="+topicPartition); try { Integer.parseInt("getOrCreateLog") }catch { case e: Exception =>error("===", e) }
 
           // Remove the preferred log dir since it has already been satisfied
           preferredLogDirs.remove(topicPartition)

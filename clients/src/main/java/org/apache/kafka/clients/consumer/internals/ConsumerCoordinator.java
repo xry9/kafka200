@@ -241,8 +241,8 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
             throw new IllegalStateException("Coordinator selected invalid assignment protocol: " + assignmentStrategy);
 
         Assignment assignment = ConsumerProtocol.deserializeAssignment(assignmentBuffer);
+        //System.out.println("===onJoinComplete===244==="+memberId+"==="+assignment.partitions());
         subscriptions.assignFromSubscribed(assignment.partitions());
-
         // check if the assignment contains some topics that were not in the original
         // subscription, if yes we will obey what leader has decided and add these topics
         // into the subscriptions as long as they still match the subscribed pattern
@@ -535,7 +535,7 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
 
             // contact coordinator to fetch committed offsets
             final RequestFuture<Map<TopicPartition, OffsetAndMetadata>> future;
-            System.out.println("===fetchCommittedOffsets===538==="+(pendingCommittedOffsetRequest != null)+"==="+partitions);
+            //System.out.println("===fetchCommittedOffsets===538==="+(pendingCommittedOffsetRequest != null)+"==="+partitions);
             if (pendingCommittedOffsetRequest != null) {
                 future = pendingCommittedOffsetRequest.response;
             } else {

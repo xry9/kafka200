@@ -97,7 +97,7 @@ class ReplicaStateMachine(config: KafkaConfig,
 
   def handleStateChanges(replicas: Seq[PartitionAndReplica], targetState: ReplicaState, callbacks: Callbacks = new Callbacks()): Unit = {
     if (replicas.nonEmpty) {
-      info("===handleStateChanges===100==="+replicas+"==="+targetState.state); //try { Integer.parseInt("handleStateChanges") } catch {case e:Exception => error("===", e)}
+      //info("===handleStateChanges===100==="+replicas+"==="+targetState.state); //try { Integer.parseInt("handleStateChanges") } catch {case e:Exception => error("===", e)}
       try {
         controllerBrokerRequestBatch.newBatch()
         replicas.groupBy(_.replica).map { case (replicaId, replicas) =>
@@ -308,7 +308,7 @@ class ReplicaStateMachine(config: KafkaConfig,
     }.toMap
     val leaderIsrAndControllerEpochs = (leaderAndIsrsWithoutReplica ++ successfulUpdates).map { case (partition, leaderAndIsr) =>
       val leaderIsrAndControllerEpoch = LeaderIsrAndControllerEpoch(leaderAndIsr, controllerContext.epoch)
-      info("===partitionLeadershipInfo===311==="+partition+"==="+leaderIsrAndControllerEpoch)
+      //info("===partitionLeadershipInfo===311==="+partition+"==="+leaderIsrAndControllerEpoch)
       controllerContext.partitionLeadershipInfo.put(partition, leaderIsrAndControllerEpoch)
       partition -> leaderIsrAndControllerEpoch
     }

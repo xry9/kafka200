@@ -54,13 +54,13 @@ public class Producer extends Thread {
             if (isAsync) { // Send asynchronously
                 producer.send(new ProducerRecord<>(topic,
                     messageNo, messageStr), new DemoCallBack(startTime, messageNo, messageStr));
-
+//                System.out.println("Sent message: (" + messageNo + ", " + messageStr + ")");
             } else { // Send synchronously
                 try {
                     producer.send(new ProducerRecord<>(topic,
                         messageNo,
                         messageStr)).get();
-                    System.out.println("Sent message: (" + messageNo + ", " + messageStr + ")");
+//                    System.out.println("Sent message: (" + messageNo + ", " + messageStr + ")");
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
                 }

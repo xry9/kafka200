@@ -184,6 +184,7 @@ class GroupMetadataManager(brokerId: Int,
    * Add a group or get the group associated with the given groupId if it already exists
    */
   def addGroup(group: GroupMetadata): GroupMetadata = {
+    //info("===addGroup===187==="+group.groupId); try { Integer.parseInt("addGroup") } catch {case e:Exception => error("===", e)}
     val currentGroup = groupMetadataCache.putIfNotExists(group.groupId, group)
     if (currentGroup != null) {
       currentGroup
@@ -191,7 +192,6 @@ class GroupMetadataManager(brokerId: Int,
       group
     }
   }
-
   def storeGroup(group: GroupMetadata,
                  groupAssignment: Map[String, Array[Byte]],
                  responseCallback: Errors => Unit): Unit = {
@@ -209,7 +209,7 @@ class GroupMetadataManager(brokerId: Int,
         val timestamp = time.milliseconds()
         val key = GroupMetadataManager.groupMetadataKey(group.groupId)
         val value = GroupMetadataManager.groupMetadataValue(group, groupAssignment, version = groupMetadataValueVersion)
-
+        info("===storeGroup===212==="+group.groupId+"==="+group+"==="+groupAssignment)
         val records = {
           val buffer = ByteBuffer.allocate(AbstractRecords.estimateSizeInBytes(magicValue, compressionType,
             Seq(new SimpleRecord(timestamp, key, value)).asJava))
@@ -514,9 +514,9 @@ class GroupMetadataManager(brokerId: Int,
     replicaManager.getLog(topicPartition) match {
       case None =>
         warn(s"Attempted to load offsets and group metadata from $topicPartition, but found no log")
-
       case Some(log) =>
-        var currOffset = log.logStartOffset
+      info("===doLoadGroupsAndOffsets===518==="+topicPartition+"==="+log.dir)
+      var currOffset = log.logStartOffset
         lazy val buffer = ByteBuffer.allocate(config.loadBufferSize)
 
         // loop breaks if leader changes at any time during the load, since getHighWatermark is -1
@@ -556,12 +556,12 @@ class GroupMetadataManager(brokerId: Int,
                 require(record.hasKey, "Group metadata/offset entry key should not be null")
                 if (batchBaseOffset.isEmpty)
                   batchBaseOffset = Some(record.offset)
-                //info("===doLoadGroupsAndOffsets===559==="+record.key)
+                //info("===doLoadGroupsAndOffsets===559==="+topicPartition+"==="+record.offset)
                 GroupMetadataManager.readMessageKey(record.key) match {
                   case offsetKey: OffsetKey =>
                     if (isTxnOffsetCommit && !pendingOffsets.contains(batch.producerId))
                       pendingOffsets.put(batch.producerId, mutable.Map[GroupTopicPartition, CommitRecordMetadataAndOffset]())
-
+                    //info("===doLoadGroupsAndOffsets===564==="+loadedGroups.size+"==="+topicPartition)
                     // load offset
                     val groupTopicPartition = offsetKey.key
                     if (!record.hasValue) {
@@ -580,7 +580,7 @@ class GroupMetadataManager(brokerId: Int,
                     // load group metadata
                     val groupId = groupMetadataKey.key
                     val groupMetadata = GroupMetadataManager.readGroupMessageValue(groupId, record.value)
-                    //info("===doLoadGroupsAndOffsets===583==="+loadedGroups.size+"==="+topicPartition+"==="+groupId+"==="+groupMetadata)//+"==="+groupMetadata.allMembers
+                    //info("===doLoadGroupsAndOffsets===583==="+loadedGroups.size+"==="+topicPartition+"==="+groupId+"==="+ (if(groupMetadata!=null) groupMetadata.allOffsets else "null"))//+"==="+groupMetadata.allMembers
                     if (groupMetadata != null) {
                       removedGroups.remove(groupId)
                       loadedGroups.put(groupId, groupMetadata)
@@ -623,7 +623,7 @@ class GroupMetadataManager(brokerId: Int,
           val offsets = groupOffsets.getOrElse(group.groupId, Map.empty[TopicPartition, CommitRecordMetadataAndOffset])
           val pendingOffsets = pendingGroupOffsets.getOrElse(group.groupId, Map.empty[Long, mutable.Map[TopicPartition, CommitRecordMetadataAndOffset]])
           debug(s"Loaded group metadata $group with offsets $offsets and pending offsets $pendingOffsets")
-          //info("===doLoadGroupsAndOffsets===626==="+group+"==="+offsets)
+          //info("===doLoadGroupsAndOffsets===626==="+group+"==="+offsets+"==="+pendingGroupOffsets)
           loadGroup(group, offsets, pendingOffsets)
           onGroupLoaded(group)
         }

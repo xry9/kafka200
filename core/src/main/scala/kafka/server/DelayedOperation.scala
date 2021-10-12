@@ -361,7 +361,7 @@ final class DelayedOperationPurgatory[T <: DelayedOperation](purgatoryName: Stri
     // traverse the list and try to complete some watched elements
     def tryCompleteWatched(): Int = {
       var completed = 0
-
+      info("===operations===364==="+operations); try { Integer.parseInt("operations") } catch {case e:Exception => error("===", e)}
       val iter = operations.iterator()
       while (iter.hasNext) {
         val curr = iter.next()
@@ -379,8 +379,8 @@ final class DelayedOperationPurgatory[T <: DelayedOperation](purgatoryName: Stri
 
       completed
     }
-
     def cancel(): List[T] = {
+      info("===operations===383==="+operations); try { Integer.parseInt("operations") } catch {case e:Exception => error("===", e)}
       val iter = operations.iterator()
       val cancelled = new ListBuffer[T]()
       while (iter.hasNext) {
@@ -395,7 +395,7 @@ final class DelayedOperationPurgatory[T <: DelayedOperation](purgatoryName: Stri
     // traverse the list and purge elements that are already completed by others
     def purgeCompleted(): Int = {
       var purged = 0
-
+      info("===operations===398==="+operations); try { Integer.parseInt("operations") } catch {case e:Exception => error("===", e)}
       val iter = operations.iterator()
       while (iter.hasNext) {
         val curr = iter.next()

@@ -88,22 +88,22 @@ class Replica(val brokerId: Int,
     lastFetchTimeMs = curTimeMs
     _lastCaughtUpTimeMs = lastCaughtUpTimeMs
   }
-
   private def logEndOffset_=(newLogEndOffset: LogOffsetMetadata) {
     if (isLocal) {
       throw new KafkaException(s"Should not set log end offset on partition $topicPartition's local replica $brokerId")
     } else {
+      info("===logEndOffset===95==="+newLogEndOffset); try { Integer.parseInt("logEndOffset") } catch {case e:Exception => error("===", e)}
       logEndOffsetMetadata = newLogEndOffset
       trace(s"Setting log end offset for replica $brokerId for partition $topicPartition to [$logEndOffsetMetadata]")
     }
   }
-
-  def logEndOffset: LogOffsetMetadata =
+  def logEndOffset: LogOffsetMetadata ={
+    info("===logEndOffset===101==="+isLocal+"==="+brokerId+"==="+(if(isLocal) log.get.dir else logEndOffsetMetadata))
     if (isLocal)
       log.get.logEndOffsetMetadata
     else
       logEndOffsetMetadata
-
+  }
   /**
    * Increment the log start offset if the new offset is greater than the previous log start offset. The replica
    * must be local and the new log start offset must be lower than the current high watermark.
@@ -128,13 +128,13 @@ class Replica(val brokerId: Int,
       trace(s"Setting log start offset for remote replica $brokerId for partition $topicPartition to [$newLogStartOffset]")
     }
   }
-
-  def logStartOffset: Long =
+  def logStartOffset: Long ={
+    info("===logStartOffset===132==="+isLocal+"==="+log.get.hashCode()+"==="+log.get.logStartOffset)
     if (isLocal)
       log.get.logStartOffset
     else
       _logStartOffset
-
+  }
   def highWatermark_=(newHighWatermark: LogOffsetMetadata) {
     if (isLocal) {
       if (newHighWatermark.messageOffset < 0)

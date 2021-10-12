@@ -238,7 +238,7 @@ class Log(@volatile var dir: File,
 
     /* Calculate the offset of the next message */
     nextOffsetMetadata = new LogOffsetMetadata(nextOffset, activeSegment.baseOffset, activeSegment.size)
-    //info("===nextOffsetMetadata===241==="+nextOffsetMetadata)
+    info("===nextOffsetMetadata===241==="+nextOffsetMetadata)
     _leaderEpochCache.clearAndFlushLatest(nextOffsetMetadata.messageOffset)
 
     logStartOffset = math.max(logStartOffset, segments.firstEntry.getValue.baseOffset)
@@ -521,7 +521,7 @@ class Log(@volatile var dir: File,
 
   private def updateLogEndOffset(messageOffset: Long) {
     nextOffsetMetadata = new LogOffsetMetadata(messageOffset, activeSegment.baseOffset, activeSegment.size)
-    //info("===nextOffsetMetadata===524==="+nextOffsetMetadata); try { Integer.parseInt("nextOffsetMetadata") } catch {case e:Exception => error("===", e)}
+    info("===nextOffsetMetadata===524==="+nextOffsetMetadata); try { Integer.parseInt("nextOffsetMetadata") } catch {case e:Exception => error("===", e)}
   }
   /**
    * Recover the log segments and return the next offset after recovery.

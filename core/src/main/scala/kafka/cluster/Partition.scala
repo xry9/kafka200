@@ -168,7 +168,7 @@ class Partition(val topic: String,
     }
   }
   def getOrCreateReplica(replicaId: Int = localBrokerId, isNew: Boolean = false): Replica = {
-    //info("===allReplicasMap===171==="+replicaId+"==="+allReplicasMap.size+"==="+allReplicasMap)
+    info("===allReplicasMap===171==="+this.partitionId+"==="+replicaId+"==="+allReplicasMap.size+"==="+allReplicasMap); try { Integer.parseInt("allReplicasMap") } catch { case e:Exception => error("===", e)}
     allReplicasMap.getAndMaybePut(replicaId, {
       if (isReplicaLocal(replicaId)) {
         val adminZkClient = new AdminZkClient(zkClient)
@@ -194,7 +194,7 @@ class Partition(val topic: String,
   def leaderReplicaIfLocal: Option[Replica] =
     leaderReplicaIdOpt.filter(_ == localBrokerId).flatMap(getReplica)
   def addReplicaIfNotExists(replica: Replica): Replica = {
-    info("===allReplicasMap===197==="+replica.brokerId+"==="+allReplicasMap.size+"==="+allReplicasMap)
+    info("===allReplicasMap===197==="+replica.brokerId+"==="+allReplicasMap.size+"==="+allReplicasMap); try { Integer.parseInt("allReplicasMap") } catch { case e:Exception => error("===", e)}
     allReplicasMap.putIfNotExists(replica.brokerId, replica)
   }
   def assignedReplicas: Set[Replica] =
@@ -571,8 +571,8 @@ class Partition(val topic: String,
 
     laggingReplicas
   }
-
   private def doAppendRecordsToFollowerOrFutureReplica(records: MemoryRecords, isFuture: Boolean): Unit = {
+    info("===doAppendRecordsToFollower===575==="+(if(records!=null) records.batches() else "null")+"==="+isFuture); try { Integer.parseInt("doAppendRecordsToFollower") } catch {case e:Exception => error("===", e)}
     inReadLock(leaderIsrUpdateLock) {
       if (isFuture) {
         // The read lock is needed to handle race condition if request handler thread tries to

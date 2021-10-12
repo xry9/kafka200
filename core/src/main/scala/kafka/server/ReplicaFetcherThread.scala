@@ -55,7 +55,7 @@ class ReplicaFetcherThread(name: String,
                                 fetchBackOffMs = brokerConfig.replicaFetchBackoffMs,
                                 isInterruptible = false,
                                 includeLogTruncation = true) {
-
+  info("===ReplicaFetcherThread===58==="+name+"==="+sourceBroker+"==="+quota); try { Integer.parseInt("ReplicaFetcherThread") } catch {case e:Exception => error("===", e)}
   type REQ = FetchRequest
   type PD = PartitionData
 
@@ -283,7 +283,7 @@ class ReplicaFetcherThread(name: String,
       if (partitionFetchState.isReadyForFetch && !shouldFollowerThrottle(quota, topicPartition)) {
         try {
           val logStartOffset = replicaMgr.getReplicaOrException(topicPartition).logStartOffset
-          //info("===buildFetchRequest===286==="+partitionMap.size+"==="+topicPartition+"==="+(if (partitionFetchState !=null) partitionFetchState.fetchOffset else "null")+"==="+logStartOffset+"==="+fetchSize)
+          info("===buildFetchRequest===286==="+partitionMap.size+"==="+topicPartition+"==="+(if (partitionFetchState !=null) partitionFetchState.fetchOffset else "null")+"==="+logStartOffset+"==="+fetchSize)
           builder.add(topicPartition, new JFetchRequest.PartitionData(partitionFetchState.fetchOffset, logStartOffset, fetchSize))
         } catch {
           case _: KafkaStorageException =>
@@ -301,7 +301,7 @@ class ReplicaFetcherThread(name: String,
     if (fetchMetadataSupported) {
       requestBuilder.metadata(fetchData.metadata())
     }
-    //info("===buildFetchRequest===304==="+fetchData)
+    info("===buildFetchRequest===304==="+fetchData.sessionPartitions())
     ResultWithPartitions(new FetchRequest(fetchData.sessionPartitions(), requestBuilder), partitionsWithError)
   }
 

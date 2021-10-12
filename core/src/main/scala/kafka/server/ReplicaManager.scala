@@ -468,8 +468,8 @@ class ReplicaManager(val config: KafkaConfig,
                     recordConversionStatsCallback: Map[TopicPartition, RecordConversionStats] => Unit = _ => ()) {
     if (isValidRequiredAcks(requiredAcks)) {
       val sTime = time.milliseconds
-      val localProduceResults = appendToLocalLog(internalTopicsAllowed = internalTopicsAllowed,
-        isFromClient = isFromClient, entriesPerPartition, requiredAcks)
+      val localProduceResults = appendToLocalLog(internalTopicsAllowed = internalTopicsAllowed, isFromClient = isFromClient, entriesPerPartition, requiredAcks)
+
       debug("Produce to local log in %d ms".format(time.milliseconds - sTime))
 
       val produceStatus = localProduceResults.map { case (topicPartition, result) =>
@@ -1351,12 +1351,12 @@ class ReplicaManager(val config: KafkaConfig,
         case Some(partition) =>
           partition.getReplica(replicaId) match {
             case Some(replica) =>
+              info("===updateFollowerLogReadResults===1354==="+replica)
               partition.updateReplicaLogReadResult(replica, readResult)
             case None =>
               warn(s"Leader $localBrokerId failed to record follower $replicaId's position " +
                 s"${readResult.info.fetchOffsetMetadata.messageOffset} since the replica is not recognized to be " +
-                s"one of the assigned replicas ${partition.assignedReplicas.map(_.brokerId).mkString(",")} " +
-                s"for partition $topicPartition. Empty records will be returned for this partition.")
+                s"one of the assigned replicas ${partition.assignedReplicas.map(_.brokerId).mkString(",")} " + s"for partition $topicPartition. Empty records will be returned for this partition.")
               updatedReadResult = readResult.withEmptyFetchInfo
           }
         case None =>

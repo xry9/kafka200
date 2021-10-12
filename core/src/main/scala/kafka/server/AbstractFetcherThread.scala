@@ -110,10 +110,10 @@ abstract class AbstractFetcherThread(name: String,
       handlePartitionsWithErrors(partitionsWithError)
       fetchRequest
     }
+    info("===doWork===113==="+this.partitionsAndOffsets+"==="+(!fetchRequest.isEmpty))
     if (!fetchRequest.isEmpty)
       processFetchRequest(fetchRequest)
   }
-
   /**
     * - Build a leader epoch fetch based on partitions that are in the Truncating phase
     * - Issue LeaderEpochRequeust, retrieving the latest offset for each partition's
@@ -184,10 +184,10 @@ abstract class AbstractFetcherThread(name: String,
                     fetcherLagStats.getAndMaybePut(topic, partitionId).lag = Math.max(0L, partitionData.highWatermark - newOffset)
                     // Once we hand off the partition data to the subclass, we can't mess with it any more in this thread
                     processPartitionData(topicPartition, currentPartitionFetchState.fetchOffset, partitionData)
-
                     val validBytes = records.validBytes
                     // ReplicaDirAlterThread may have removed topicPartition from the partitionStates after processing the partition data
                     if (validBytes > 0 && partitionStates.contains(topicPartition)) {
+                      info("===partitionStates===190==="+topicPartition+"==="+newOffset+"==="+partitionStates)
                       // Update partitionStates only if there is no exception during processPartitionData
                       partitionStates.updateAndMoveToEnd(topicPartition, new PartitionFetchState(newOffset))
                       fetcherStats.byteRate.mark(validBytes)
@@ -210,9 +210,9 @@ abstract class AbstractFetcherThread(name: String,
                 case Errors.OFFSET_OUT_OF_RANGE =>
                   try {
                     val newOffset = handleOffsetOutOfRange(topicPartition)
+                    info("===partitionStates===213==="+partitionStates)
                     partitionStates.updateAndMoveToEnd(topicPartition, new PartitionFetchState(newOffset))
-                    info(s"Current offset ${currentPartitionFetchState.fetchOffset} for partition $topicPartition is " +
-                      s"out of range, which typically implies a leader change. Reset fetch offset to $newOffset")
+                    info(s"Current offset ${currentPartitionFetchState.fetchOffset} for partition $topicPartition is " + s"out of range, which typically implies a leader change. Reset fetch offset to $newOffset")
                   } catch {
                     case e: FatalExitError => throw e
                     case e: Throwable =>
@@ -240,7 +240,6 @@ abstract class AbstractFetcherThread(name: String,
       handlePartitionsWithErrors(partitionsWithError)
     }
   }
-
   def markPartitionsForTruncation(topicPartition: TopicPartition, truncationOffset: Long) {
     if (!includeLogTruncation)
       throw new IllegalStateException("Truncation should not be requested if includeLogTruncation is disabled")
@@ -248,6 +247,7 @@ abstract class AbstractFetcherThread(name: String,
     try {
       Option(partitionStates.stateValue(topicPartition)).foreach { state =>
         val newState = PartitionFetchState(math.min(truncationOffset, state.fetchOffset), state.delay, truncatingLog = true)
+        info("===partitionStates===250==="+partitionStates)
         partitionStates.updateAndMoveToEnd(topicPartition, newState)
       }
       partitionMapCond.signalAll()
@@ -269,11 +269,11 @@ abstract class AbstractFetcherThread(name: String,
         tp -> fetchState
       }
       val existingPartitionToState = states().toMap
+      info("===partitionStates===272==="+partitionStates)
       partitionStates.set((existingPartitionToState ++ newPartitionToState).asJava)
       partitionMapCond.signalAll()
     } finally partitionMapLock.unlock()
   }
-
   /**
     * Loop through all partitions, updating their fetch offset and maybe marking them as
     * truncation completed if their offsetTruncationState indicates truncation completed
@@ -289,9 +289,9 @@ abstract class AbstractFetcherThread(name: String,
         }
         (state.topicPartition(), maybeTruncationComplete)
       }.toMap
+    info("===partitionStates===292==="+partitionStates)
     partitionStates.set(newStates.asJava)
   }
-
   /**
    * Called from ReplicaFetcherThread and ReplicaAlterLogDirsThread maybeTruncate for each topic
    * partition. Returns truncation offset and whether this is the final offset to truncate to
@@ -364,20 +364,20 @@ abstract class AbstractFetcherThread(name: String,
       }
     }
   }
-
   def delayPartitions(partitions: Iterable[TopicPartition], delay: Long) {
     partitionMapLock.lockInterruptibly()
     try {
       for (partition <- partitions) {
         Option(partitionStates.stateValue(partition)).foreach (currentPartitionFetchState =>
-          if (!currentPartitionFetchState.isDelayed)
+          if (!currentPartitionFetchState.isDelayed) {
+            info("===partitionStates===373==="+partitionStates)
             partitionStates.updateAndMoveToEnd(partition, PartitionFetchState(currentPartitionFetchState.fetchOffset, new DelayedItem(delay), currentPartitionFetchState.truncatingLog))
+          }
         )
       }
       partitionMapCond.signalAll()
     } finally partitionMapLock.unlock()
   }
-
   def removePartitions(topicPartitions: Set[TopicPartition]) {
     partitionMapLock.lockInterruptibly()
     try {

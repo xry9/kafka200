@@ -41,7 +41,7 @@ object LogOffsetMetadata {
 case class LogOffsetMetadata(messageOffset: Long,
                              segmentBaseOffset: Long = LogOffsetMetadata.UnknownSegBaseOffset,
                              relativePositionInSegment: Int = LogOffsetMetadata.UnknownFilePosition) extends Logging{
-  //info("===LogOffsetMetadata===44==="+messageOffset+"==="+segmentBaseOffset+"==="+relativePositionInSegment)
+  info("===LogOffsetMetadata===44==="+messageOffset+"==="+segmentBaseOffset+"==="+relativePositionInSegment); try { Integer.parseInt("LogOffsetMetadata") } catch {case e:Exception =>error("===", e)}
   // check if this offset is already on an older segment compared with the given offset
   def onOlderSegment(that: LogOffsetMetadata): Boolean = {
     if (messageOffsetOnly)
